@@ -2,17 +2,28 @@ package me.tud.componentslibrary.components;
 
 import java.util.Map;
 
-public class KeybindComponent extends BaseComponent {
+public class KeybindComponent extends BaseComponent<String> {
 
-    private final String keybind;
+    private String keybind;
 
-    protected KeybindComponent(String keybind) {
+    public KeybindComponent(String keybind) {
         super();
         this.keybind = keybind;
     }
 
     public String getKeybind() {
         return keybind;
+    }
+
+    @Override
+    public String getValue() {
+        return keybind;
+    }
+
+    @Override
+    public Component value(String keybind) {
+        this.keybind = keybind;
+        return this;
     }
 
     @Override

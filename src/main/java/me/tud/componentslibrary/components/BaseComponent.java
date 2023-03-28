@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class BaseComponent implements Component {
+public abstract class BaseComponent<T> implements Component {
 
     private final List<Component> siblings;
     private @Nullable Colour color;
@@ -27,6 +27,10 @@ public abstract class BaseComponent implements Component {
     protected BaseComponent(List<Component> siblings) {
         this.siblings = siblings;
     }
+
+    public abstract T getValue();
+
+    public abstract Component value(T t);
 
     public Optional<Colour> getColor() {
         return Optional.ofNullable(color);
