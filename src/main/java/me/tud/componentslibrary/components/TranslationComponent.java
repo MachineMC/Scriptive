@@ -36,4 +36,5 @@ public class TranslationComponent extends BaseComponent<String> {
     public static TranslationComponent of(String translation) {
         return new TranslationComponent(translation);
     }
+
 }
