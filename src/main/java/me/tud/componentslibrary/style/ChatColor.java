@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.color;
+package me.tud.componentslibrary.style;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -8,7 +8,7 @@ import java.util.Locale;
 /**
  * Default color values for Minecraft chat.
  */
-public enum ChatColor implements Colour {
+public enum ChatColor implements ChatCode, Colour {
 
     BLACK('0', 30, 0x000000),
     DARK_BLUE('1', 34, 0x0000AA),
@@ -26,46 +26,33 @@ public enum ChatColor implements Colour {
     LIGHT_PURPLE('d', 95, 0xFF55FF),
     YELLOW('e', 93, 0xFFFF55),
     WHITE('f', 97, 0xFFFFFF),
-    OBFUSCATED('k', 5),
-    BOLD('l', 1),
-    STRIKETHROUGH('m', 9),
-    UNDERLINED('n', 4),
-    ITALIC('o', 3),
     RESET('r', 0, -1);
 
     private final char code;
     private final int consoleCode;
     private final int hexCode;
-    private final boolean isFormat;
     private final boolean isColor;
 
-    ChatColor(char code, int consoleCode, int hexCode, boolean isFormat) {
+    ChatColor(char code, int consoleCode, int hexCode) {
         this.code = code;
         this.consoleCode = consoleCode;
         this.hexCode = hexCode;
-        this.isFormat = isFormat;
-        this.isColor = !isFormat && code != 'r';
+        this.isColor = code != 'r';
     }
 
-    ChatColor(char code, int consoleCode) {
-        this(code, consoleCode, -1, true);
-    }
-
-    ChatColor(char code, int consoleCode, int hexCode) {
-        this(code, consoleCode, hexCode, false);
-    }
-
+    @Override
     public char getCode() {
         return code;
     }
 
+    @Override
     public int getConsoleCode() {
         return consoleCode;
     }
 
     @Override
-    public boolean isDefaultColor() {
-        return true;
+    public @Range(from = 0, to = 21) int getIntCode() {
+        return ordinal();
     }
 
     @Override
@@ -75,7 +62,12 @@ public enum ChatColor implements Colour {
 
     @Override
     public boolean isFormat() {
-        return isFormat;
+        return false;
+    }
+
+    @Override
+    public boolean isDefaultColor() {
+        return true;
     }
 
     @Override
@@ -86,13 +78,6 @@ public enum ChatColor implements Colour {
     @Override
     public String getName() {
         return name().toLowerCase(Locale.ENGLISH);
-    }
-
-    /**
-     * @return numeric code of the chat color
-     */
-    public @Range(from = 0, to = 21) int getIntCode() {
-        return ordinal();
     }
 
     @Override

@@ -21,9 +21,8 @@ public class TextComponent extends BaseComponent<String> {
     }
 
     @Override
-    public Component value(String text) {
+    public void setValue(String text) {
         this.text = text;
-        return this;
     }
 
     @Override
@@ -31,6 +30,13 @@ public class TextComponent extends BaseComponent<String> {
         Map<String, Object> map = super.asMap();
         map.put("text", text);
         return map;
+    }
+
+    @Override
+    public TextComponent clone() {
+        TextComponent clone = new TextComponent(text);
+        clone.merge(this);
+        return clone;
     }
 
     public static TextComponent of(String text) {

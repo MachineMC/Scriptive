@@ -21,9 +21,8 @@ public class TranslationComponent extends BaseComponent<String> {
     }
 
     @Override
-    public Component value(String translation) {
+    public void setValue(String translation) {
         this.translation = translation;
-        return this;
     }
 
     @Override
@@ -31,6 +30,13 @@ public class TranslationComponent extends BaseComponent<String> {
         Map<String, Object> map = super.asMap();
         map.put("translate", translation);
         return map;
+    }
+
+    @Override
+    public TranslationComponent clone() {
+        TranslationComponent clone = new TranslationComponent(translation);
+        clone.merge(this);
+        return clone;
     }
 
     public static TranslationComponent of(String translation) {

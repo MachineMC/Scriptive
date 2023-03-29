@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.color;
+package me.tud.componentslibrary.style;
 
 import me.tud.componentslibrary.exceptions.MalformedHexCodeException;
 
@@ -18,22 +18,16 @@ public class HexColor implements Colour {
                 ((b & 0xFF)));
     }
 
+    public HexColor(String hex) {
+        this(fromHex(hex));
+    }
+
     public HexColor(Color color) {
         this(color.getRGB());
     }
 
     @Override
     public boolean isDefaultColor() {
-        return false;
-    }
-
-    @Override
-    public boolean isColor() {
-        return true;
-    }
-
-    @Override
-    public boolean isFormat() {
         return false;
     }
 
@@ -47,12 +41,12 @@ public class HexColor implements Colour {
         return "#" + getHexString();
     }
 
-    public static HexColor fromHex(String hex) throws MalformedHexCodeException {
+    private static int fromHex(String hex) throws MalformedHexCodeException {
         int start = hex.startsWith("#") ? 1 : 0;
         if (hex.length() - start != 6)
             throw new MalformedHexCodeException(hex);
         try {
-            return new HexColor(Integer.parseInt(hex.substring(start), 16));
+            return Integer.parseInt(hex.substring(start), 16);
         } catch (NumberFormatException e) {
             throw new MalformedHexCodeException(hex, e);
         }

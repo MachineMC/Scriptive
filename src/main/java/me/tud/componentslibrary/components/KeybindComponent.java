@@ -6,7 +6,7 @@ public class KeybindComponent extends BaseComponent<String> {
 
     private String keybind;
 
-    public KeybindComponent(String keybind) {
+    protected KeybindComponent(String keybind) {
         super();
         this.keybind = keybind;
     }
@@ -21,9 +21,8 @@ public class KeybindComponent extends BaseComponent<String> {
     }
 
     @Override
-    public Component value(String keybind) {
+    public void setValue(String keybind) {
         this.keybind = keybind;
-        return this;
     }
 
     @Override
@@ -31,6 +30,17 @@ public class KeybindComponent extends BaseComponent<String> {
         Map<String, Object> map = super.asMap();
         map.put("keybind", keybind);
         return map;
+    }
+
+    @Override
+    public KeybindComponent clone() {
+        KeybindComponent clone = new KeybindComponent(keybind);
+        clone.merge(this);
+        return clone;
+    }
+
+    public static KeybindComponent of(String keybind) {
+        return new KeybindComponent(keybind);
     }
 
 }

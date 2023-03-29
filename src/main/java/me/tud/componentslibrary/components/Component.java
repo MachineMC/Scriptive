@@ -1,9 +1,11 @@
 package me.tud.componentslibrary.components;
 
-import me.tud.componentslibrary.events.ClickEvent;
 import me.tud.componentslibrary.Contents;
+import me.tud.componentslibrary.events.ClickEvent;
 import me.tud.componentslibrary.events.HoverEvent;
-import me.tud.componentslibrary.color.Colour;
+import me.tud.componentslibrary.style.ChatStyle;
+import me.tud.componentslibrary.style.Colour;
+import me.tud.componentslibrary.style.TextFormat;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -11,126 +13,215 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface Component extends Contents {
+public interface Component<T> extends Contents, Cloneable {
+
+    T getValue();
+
+    void setValue(T t);
 
     Optional<Colour> getColor();
 
-    Component color(@Nullable Colour color);
+    void setColor(@Nullable Colour color);
 
     Optional<Boolean> isBold();
 
-    Component bold(@Nullable Boolean bold);
+    void setBold(@Nullable Boolean bold);
 
     Optional<Boolean> isObfuscated();
 
-    Component obfuscated(@Nullable Boolean obfuscated);
+    void setObfuscated(@Nullable Boolean obfuscated);
 
     Optional<Boolean> isItalic();
 
-    Component italic(@Nullable Boolean italic);
+    void setItalic(@Nullable Boolean italic);
 
     Optional<Boolean> isUnderlined();
 
-    Component underlined(@Nullable Boolean underlined);
+    void setUnderlined(@Nullable Boolean underlined);
 
     Optional<Boolean> isStrikethrough();
 
-    Component strikethrough(@Nullable Boolean strikethrough);
+    void setStrikethrough(@Nullable Boolean strikethrough);
 
     Optional<String> getFont();
 
-    Component font(@Nullable String font);
+    void setFont(@Nullable String font);
 
     Optional<String> getInsertion();
 
-    Component insertion(@Nullable String insertion);
+    void setInsertion(@Nullable String insertion);
 
     Optional<ClickEvent> getClickEvent();
 
-    Component clickEvent(@Nullable ClickEvent clickEvent);
+    void setClickEvent(@Nullable ClickEvent clickEvent);
 
     Optional<HoverEvent> getHoverEvent();
 
-    Component hoverEvent(@Nullable HoverEvent hoverEvent);
+    void setHoverEvent(@Nullable HoverEvent hoverEvent);
 
-    List<Component> getSiblings();
+    List<Component<?>> getSiblings();
 
     default boolean hasSiblings() {
         return getSiblings().size() > 0;
     }
 
-    default Component append(String literal) {
-        return append(literal(literal));
+    default Component<T> append(String literal) {
+        append(TextComponent.of(literal));
+        return this;
     }
 
-    Component append(Component component);
+    Component<T> append(Component<?> component);
 
-    Component clearSiblings();
+    void clearSiblings();
 
-    default Component merge(Component other) {
+    default void merge(Component<?> other) {
+        if (getClass().isInstance(other))
+            //noinspection unchecked
+            setValue((T) other.getValue());
         if (other.hasSiblings()) {
             clearSiblings();
             other.getSiblings().forEach(this::append);
         }
         if (other.getColor().isPresent())
-            color(other.getColor().get());
+            setColor(other.getColor().get());
         if (other.isBold().isPresent())
-            bold(other.isBold().get());
+            setBold(other.isBold().get());
         if (other.isItalic().isPresent())
-            italic(other.isItalic().get());
+            setItalic(other.isItalic().get());
         if (other.isUnderlined().isPresent())
-            underlined(other.isUnderlined().get());
+            setUnderlined(other.isUnderlined().get());
         if (other.isStrikethrough().isPresent())
-            strikethrough(other.isStrikethrough().get());
+            setStrikethrough(other.isStrikethrough().get());
         if (other.isObfuscated().isPresent())
-            obfuscated(other.isObfuscated().get());
+            setObfuscated(other.isObfuscated().get());
         if (other.getFont().isPresent())
-            font(other.getFont().get());
+            setFont(other.getFont().get());
         if (other.getInsertion().isPresent())
-            insertion(other.getInsertion().get());
+            setInsertion(other.getInsertion().get());
         if (other.getClickEvent().isPresent())
-            clickEvent(other.getClickEvent().get());
+            setClickEvent(other.getClickEvent().get());
         if (other.getHoverEvent().isPresent())
-            hoverEvent(other.getHoverEvent().get());
-        return this;
+            setHoverEvent(other.getHoverEvent().get());
+    }
+
+    default TextFormat getFormat() {
+        Map<ChatStyle, @Nullable Boolean> map = new HashMap<>();
+        isObfuscated().ifPresent(obfuscated -> map.put(ChatStyle.OBFUSCATED, obfuscated));
+        isBold().ifPresent(bold -> map.put(ChatStyle.BOLD, bold));
+        isStrikethrough().ifPresent(strikethrough -> map.put(ChatStyle.STRIKETHROUGH, strikethrough));
+        isUnderlined().ifPresent(underlined -> map.put(ChatStyle.UNDERLINED, underlined));
+        isItalic().ifPresent(italic -> map.put(ChatStyle.ITALIC, italic));
+        return new TextFormat(getColor().orElse(null), map);
+    }
+
+    default void applyFormat(TextFormat format) {
+        format.getColor().ifPresent(this::setColor);
+        format.getStyle(ChatStyle.BOLD).ifPresent(this::setBold);
+        format.getStyle(ChatStyle.OBFUSCATED).ifPresent(this::setObfuscated);
+        format.getStyle(ChatStyle.STRIKETHROUGH).ifPresent(this::setStrikethrough);
+        format.getStyle(ChatStyle.UNDERLINED).ifPresent(this::setUnderlined);
+        format.getStyle(ChatStyle.ITALIC).ifPresent(this::setItalic);
+    }
+
+    default ComponentModifier<T> modify() {
+        return new ComponentModifier<>(this);
     }
 
     @Override
     default Map<String, Object> asMap() {
         Map<String, Object> map = new HashMap<>();
-        if (getColor().isPresent())
-            map.put("color", getColor().get().getName());
-        if (isBold().isPresent())
-            map.put("bold", isBold().get());
-        if (isItalic().isPresent())
-            map.put("italic", isItalic().get());
-        if (isUnderlined().isPresent())
-            map.put("underlined", isUnderlined().get());
-        if (isStrikethrough().isPresent())
-            map.put("strikethrough", isStrikethrough().get());
-        if (isObfuscated().isPresent())
-            map.put("obfuscated", isObfuscated().get());
-        if (getInsertion().isPresent())
-            map.put("insertion", getInsertion().get());
-        if (getClickEvent().isPresent())
-            map.put("clickEvent", getClickEvent().get().asMap());
-        if (getHoverEvent().isPresent())
-            map.put("hoverEvent", getHoverEvent().get().asMap());
+        getColor().ifPresent(color -> map.put("color", color.getName()));
+        isBold().ifPresent(bold -> map.put("bold", bold));
+        isItalic().ifPresent(italic -> map.put("italic", italic));
+        isUnderlined().ifPresent(underlined -> map.put("underlined", underlined));
+        isStrikethrough().ifPresent(strikethrough -> map.put("strikethrough", strikethrough));
+        isObfuscated().ifPresent(obfuscated -> map.put("obfuscated", obfuscated));
+        getInsertion().ifPresent(insertion -> map.put("insertion", insertion));
+        getClickEvent().ifPresent(clickEvent -> map.put("clickEvent", clickEvent.asMap()));
+        getHoverEvent().ifPresent(hoverEvent -> map.put("hoverEvent", hoverEvent.asMap()));
         if (hasSiblings())
             map.put("extra", getSiblings().stream().map(Contents::asMap).toArray(Map[]::new));
         return map;
     }
 
-    static Component literal(String literal) {
-        return new TextComponent(literal);
-    }
+    String toLegacyString();
 
-    static Component translation(String translation) {
-        return new TranslationComponent(translation);
-    }
+    Component<T> clone();
 
-    static Component keybind(String keybind) {
-        return new KeybindComponent(keybind);
+    class ComponentModifier<T> {
+
+        private final Component<T> original, clone;
+
+        private ComponentModifier(Component<T> component) {
+            this.original = component;
+            this.clone = original.clone();
+        }
+
+        public ComponentModifier<T> value(T t) {
+            clone.setValue(t);
+            return this;
+        }
+
+        public ComponentModifier<T> color(@Nullable Colour color) {
+            clone.setColor(color);
+            return this;
+        }
+
+        public ComponentModifier<T> bold(@Nullable Boolean bold) {
+            clone.setBold(bold);
+            return this;
+        }
+
+        public ComponentModifier<T> italic(@Nullable Boolean italic) {
+            clone.setItalic(italic);
+            return this;
+        }
+
+        public ComponentModifier<T> underlined(@Nullable Boolean underlined) {
+            clone.setUnderlined(underlined);
+            return this;
+        }
+
+        public ComponentModifier<T> strikethrough(@Nullable Boolean strikethrough) {
+            clone.setStrikethrough(strikethrough);
+            return this;
+        }
+
+        public ComponentModifier<T> obfuscated(@Nullable Boolean obfuscated) {
+            clone.setObfuscated(obfuscated);
+            return this;
+        }
+
+        public ComponentModifier<T> insertion(@Nullable String insertion) {
+            clone.setInsertion(insertion);
+            return this;
+        }
+
+        public ComponentModifier<T> clickEvent(@Nullable ClickEvent clickEvent) {
+            clone.setClickEvent(clickEvent);
+            return this;
+        }
+
+        public ComponentModifier<T> hoverEvent(@Nullable HoverEvent hoverEvent) {
+            clone.setHoverEvent(hoverEvent);
+            return this;
+        }
+
+        public ComponentModifier<T> append(String literal) {
+            clone.append(literal);
+            return this;
+        }
+
+        public ComponentModifier<T> append(Component<?> other) {
+            clone.append(other);
+            return this;
+        }
+
+        public Component<T> finish() {
+            original.merge(clone);
+            return original;
+        }
+
     }
 
 }

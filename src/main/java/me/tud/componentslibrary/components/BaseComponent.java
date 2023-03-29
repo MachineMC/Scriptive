@@ -2,18 +2,17 @@ package me.tud.componentslibrary.components;
 
 import me.tud.componentslibrary.events.ClickEvent;
 import me.tud.componentslibrary.events.HoverEvent;
-import me.tud.componentslibrary.color.Colour;
+import me.tud.componentslibrary.style.ChatStyle;
+import me.tud.componentslibrary.style.Colour;
+import me.tud.componentslibrary.style.TextFormat;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-public abstract class BaseComponent<T> implements Component {
+public abstract class BaseComponent<T> implements Component<T> {
 
-    private final List<Component> siblings;
+    private final List<Component<?>> siblings;
     private @Nullable Colour color;
     private @Nullable Boolean bold, italic, underlined, strikethrough, obfuscated;
     private @Nullable String font, insertion;
@@ -24,75 +23,64 @@ public abstract class BaseComponent<T> implements Component {
         this(new ArrayList<>());
     }
 
-    protected BaseComponent(List<Component> siblings) {
+    protected BaseComponent(List<Component<?>> siblings) {
         this.siblings = siblings;
     }
-
-    public abstract T getValue();
-
-    public abstract Component value(T t);
 
     public Optional<Colour> getColor() {
         return Optional.ofNullable(color);
     }
 
-    public Component color(@Nullable Colour color) {
+    public void setColor(@Nullable Colour color) {
         this.color = color;
-        return this;
     }
 
     public Optional<Boolean> isBold() {
         return Optional.ofNullable(bold);
     }
 
-    public Component bold(@Nullable Boolean bold) {
+    public void setBold(@Nullable Boolean bold) {
         this.bold = bold;
-        return this;
     }
 
     public Optional<Boolean> isObfuscated() {
         return Optional.ofNullable(obfuscated);
     }
 
-    public Component obfuscated(@Nullable Boolean obfuscated) {
+    public void setObfuscated(@Nullable Boolean obfuscated) {
         this.obfuscated = obfuscated;
-        return this;
     }
 
     public Optional<Boolean> isItalic() {
         return Optional.ofNullable(italic);
     }
 
-    public Component italic(@Nullable Boolean italic) {
+    public void setItalic(@Nullable Boolean italic) {
         this.italic = italic;
-        return this;
     }
 
     public Optional<Boolean> isUnderlined() {
         return Optional.ofNullable(underlined);
     }
 
-    public Component underlined(@Nullable Boolean underlined) {
+    public void setUnderlined(@Nullable Boolean underlined) {
         this.underlined = underlined;
-        return this;
     }
 
     public Optional<Boolean> isStrikethrough() {
         return Optional.ofNullable(strikethrough);
     }
 
-    public Component strikethrough(@Nullable Boolean strikethrough) {
+    public void setStrikethrough(@Nullable Boolean strikethrough) {
         this.strikethrough = strikethrough;
-        return this;
     }
 
     public Optional<String> getFont() {
         return Optional.ofNullable(font);
     }
 
-    public Component font(@Nullable String font) {
+    public void setFont(@Nullable String font) {
         this.font = font;
-        return this;
     }
 
     @Override
@@ -101,9 +89,8 @@ public abstract class BaseComponent<T> implements Component {
     }
 
     @Override
-    public Component insertion(@Nullable String insertion) {
+    public void setInsertion(@Nullable String insertion) {
         this.insertion = insertion;
-        return this;
     }
 
     @Override
@@ -112,9 +99,8 @@ public abstract class BaseComponent<T> implements Component {
     }
 
     @Override
-    public Component clickEvent(@Nullable ClickEvent clickEvent) {
+    public void setClickEvent(@Nullable ClickEvent clickEvent) {
         this.clickEvent = clickEvent;
-        return this;
     }
 
     @Override
@@ -123,26 +109,67 @@ public abstract class BaseComponent<T> implements Component {
     }
 
     @Override
-    public Component hoverEvent(@Nullable HoverEvent hoverEvent) {
+    public void setHoverEvent(@Nullable HoverEvent hoverEvent) {
         this.hoverEvent = hoverEvent;
-        return this;
     }
 
     @Override
-    public @UnmodifiableView List<Component> getSiblings() {
+    public @UnmodifiableView List<Component<?>> getSiblings() {
         return Collections.unmodifiableList(siblings);
     }
 
     @Override
-    public Component append(Component component) {
-        siblings.add(component);
+    public Component<T> append(Component<?> component) {
+        siblings.add(component.clone());
         return this;
     }
 
     @Override
-    public Component clearSiblings() {
+    public void clearSiblings() {
         siblings.clear();
-        return this;
+    }
+
+    @Override
+    public String toLegacyString() {
+        List<Component<?>> components = separateComponent(this);
+        StringBuilder builder = new StringBuilder();
+        for (Component<?> component : components)
+            builder.append(toLegacyString(component));
+        return builder.toString();
+    }
+
+    @Override
+    public abstract BaseComponent<T> clone();
+
+    private static <T> List<Component<?>> separateComponent(Component<T> component) {
+        List<Component<?>> components = new LinkedList<>();
+        Component<T> parent = component.clone();
+        components.add(parent);
+        for (Component<?> child : parent.getSiblings()) {
+            child.getColor().ifPresentOrElse(k -> {}, () -> child.setColor(parent.getColor().orElse(null)));
+            child.isBold().ifPresentOrElse(k -> {}, () -> child.setBold(parent.isBold().orElse(null)));
+            child.isItalic().ifPresentOrElse(k -> {}, () -> child.setItalic(parent.isItalic().orElse(null)));
+            child.isUnderlined().ifPresentOrElse(k -> {}, () -> child.setUnderlined(parent.isUnderlined().orElse(null)));
+            child.isStrikethrough().ifPresentOrElse(k -> {}, () -> child.setStrikethrough(parent.isStrikethrough().orElse(null)));
+            child.isObfuscated().ifPresentOrElse(k -> {}, () -> child.setObfuscated(parent.isObfuscated().orElse(null)));
+            child.getFont().ifPresentOrElse(k -> {}, () -> child.setFont(parent.getFont().orElse(null)));
+            child.getInsertion().ifPresentOrElse(k -> {}, () -> child.setInsertion(parent.getInsertion().orElse(null)));
+            child.getClickEvent().ifPresentOrElse(k -> {}, () -> child.setClickEvent(parent.getClickEvent().orElse(null)));
+            child.getHoverEvent().ifPresentOrElse(k -> {}, () -> child.setHoverEvent(parent.getHoverEvent().orElse(null)));
+            components.addAll(separateComponent(child));
+        }
+        parent.clearSiblings();
+        return components;
+    }
+
+    private static String toLegacyString(Component<?> component) {
+        StringBuilder builder = new StringBuilder();
+        TextFormat format = component.getFormat();
+        format.getColor().ifPresent(builder::append);
+        for (ChatStyle style : format.getStyles(true))
+            builder.append(style);
+        builder.append(component.getValue());
+        return builder.toString();
     }
 
 }
