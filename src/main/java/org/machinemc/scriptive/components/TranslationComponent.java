@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.components;
+package org.machinemc.scriptive.components;
 
 import java.util.Map;
 

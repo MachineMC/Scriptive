@@ -1,4 +1,4 @@
-package me.tud.componentslibrary;
+package org.machinemc.scriptive;
 
 import com.google.gson.GsonBuilder;
 

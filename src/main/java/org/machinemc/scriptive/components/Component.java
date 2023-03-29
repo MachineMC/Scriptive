@@ -1,11 +1,11 @@
-package me.tud.componentslibrary.components;
+package org.machinemc.scriptive.components;
 
-import me.tud.componentslibrary.Contents;
-import me.tud.componentslibrary.events.ClickEvent;
-import me.tud.componentslibrary.events.HoverEvent;
-import me.tud.componentslibrary.style.ChatStyle;
-import me.tud.componentslibrary.style.Colour;
-import me.tud.componentslibrary.style.TextFormat;
+import org.machinemc.scriptive.Contents;
+import org.machinemc.scriptive.events.ClickEvent;
+import org.machinemc.scriptive.events.HoverEvent;
+import org.machinemc.scriptive.style.ChatStyle;
+import org.machinemc.scriptive.style.Colour;
+import org.machinemc.scriptive.style.TextFormat;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

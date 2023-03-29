@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.style;
+package org.machinemc.scriptive.style;
 
 public interface ChatCode {
 

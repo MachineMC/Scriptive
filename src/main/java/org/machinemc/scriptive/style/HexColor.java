@@ -1,6 +1,6 @@
-package me.tud.componentslibrary.style;
+package org.machinemc.scriptive.style;
 
-import me.tud.componentslibrary.exceptions.MalformedHexCodeException;
+import org.machinemc.scriptive.exceptions.MalformedHexCodeException;
 
 import java.awt.Color;
 

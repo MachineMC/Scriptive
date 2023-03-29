@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.exceptions;
+package org.machinemc.scriptive.exceptions;
 
 public class MalformedHexCodeException extends IllegalArgumentException {
 

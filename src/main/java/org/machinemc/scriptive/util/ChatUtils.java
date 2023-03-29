@@ -1,10 +1,10 @@
-package me.tud.componentslibrary.util;
+package org.machinemc.scriptive.util;
 
-import me.tud.componentslibrary.components.Component;
-import me.tud.componentslibrary.style.ChatCode;
-import me.tud.componentslibrary.style.ChatColor;
-import me.tud.componentslibrary.style.ChatStyle;
-import me.tud.componentslibrary.style.Colour;
+import org.machinemc.scriptive.components.Component;
+import org.machinemc.scriptive.style.ChatCode;
+import org.machinemc.scriptive.style.ChatColor;
+import org.machinemc.scriptive.style.ChatStyle;
+import org.machinemc.scriptive.style.Colour;
 
 import java.util.regex.Pattern;
 

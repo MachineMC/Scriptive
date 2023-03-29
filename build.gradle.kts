@@ -2,8 +2,8 @@ plugins {
     id("java")
 }
 
-group = "me.tud"
-version = "1.0-SNAPSHOT"
+group = "org.machinemc"
+version = "1.0.0"
 
 repositories {
     mavenCentral()

@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.style;
+package org.machinemc.scriptive.style;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;

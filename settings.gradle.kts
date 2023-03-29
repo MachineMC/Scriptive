@@ -1,2 +1,2 @@
-rootProject.name = "ComponentsLibrary"
+rootProject.name = "Scriptive"
 

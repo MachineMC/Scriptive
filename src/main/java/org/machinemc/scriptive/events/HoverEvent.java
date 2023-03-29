@@ -1,6 +1,6 @@
-package me.tud.componentslibrary.events;
+package org.machinemc.scriptive.events;
 
-import me.tud.componentslibrary.Contents;
+import org.machinemc.scriptive.Contents;
 
 import java.util.Map;
 

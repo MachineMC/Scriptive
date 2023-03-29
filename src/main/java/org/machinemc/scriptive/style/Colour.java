@@ -1,4 +1,4 @@
-package me.tud.componentslibrary.style;
+package org.machinemc.scriptive.style;
 
 import java.awt.Color;
 import java.util.Locale;
