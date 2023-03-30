@@ -5,10 +5,12 @@ import java.util.Map;
 public class TranslationComponent extends BaseComponent<String> {
 
     private String translation;
+    private Component<?>[] with;
 
-    protected TranslationComponent(String translation) {
+    protected TranslationComponent(String translation, Component<?>... with) {
         super();
         this.translation = translation;
+        this.with = with;
     }
 
     public String getTranslation() {
@@ -25,10 +27,19 @@ public class TranslationComponent extends BaseComponent<String> {
         this.translation = translation;
     }
 
+    public Component<?>[] getArguments() {
+        return with;
+    }
+
+    public void setArguments(Component<?>... arguments) {
+        this.with = arguments;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         map.put("translate", translation);
+        map.put("with", with);
         return map;
     }
 
