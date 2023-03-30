@@ -5,12 +5,12 @@ import java.util.Map;
 public class TranslationComponent extends BaseComponent<String> {
 
     private String translation;
-    private Component<?>[] with;
+    private Component<?>[] arguments;
 
-    protected TranslationComponent(String translation, Component<?>... with) {
+    protected TranslationComponent(String translation, Component<?>... arguments) {
         super();
         this.translation = translation;
-        this.with = with;
+        this.arguments = arguments;
     }
 
     public String getTranslation() {
@@ -28,18 +28,18 @@ public class TranslationComponent extends BaseComponent<String> {
     }
 
     public Component<?>[] getArguments() {
-        return with;
+        return arguments;
     }
 
     public void setArguments(Component<?>... arguments) {
-        this.with = arguments;
+        this.arguments = arguments;
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         map.put("translate", translation);
-        map.put("with", with);
+        map.put("with", arguments);
         return map;
     }
 
@@ -50,8 +50,8 @@ public class TranslationComponent extends BaseComponent<String> {
         return clone;
     }
 
-    public static TranslationComponent of(String translation) {
-        return new TranslationComponent(translation);
+    public static TranslationComponent of(String translation, Component<?>... arguments) {
+        return new TranslationComponent(translation, arguments);
     }
 
 }
