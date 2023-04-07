@@ -31,6 +31,10 @@ public interface Colour {
         return new Color(getRGB());
     }
 
+    default TextFormat asTextFormat() {
+        return new TextFormat(this);
+    }
+
     /**
      * Returns the red value of this color.
      * @return red value

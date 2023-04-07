@@ -66,6 +66,11 @@ public enum ChatColor implements ChatCode, Colour {
     }
 
     @Override
+    public TextFormat asTextFormat() {
+        return new TextFormat(this);
+    }
+
+    @Override
     public boolean isDefaultColor() {
         return true;
     }
@@ -116,7 +121,7 @@ public enum ChatColor implements ChatCode, Colour {
      * @param code numeric code of the chat color
      * @return chat color with given numeric code
      */
-    public static ChatColor byCode(@Range(from = 0, to = 21) int code) {
+    public static ChatColor byCode(@Range(from = 0, to = 16) int code) {
         if (code >= values().length)
             throw new IllegalArgumentException("Unsupported ChatColor");
         return values()[code];

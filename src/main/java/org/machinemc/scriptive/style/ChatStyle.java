@@ -45,6 +45,11 @@ public enum ChatStyle implements ChatCode {
     }
 
     @Override
+    public TextFormat asTextFormat() {
+        return new TextFormat(this);
+    }
+
+    @Override
     public String toString() {
         return new String(new char[]{167, code});
     }

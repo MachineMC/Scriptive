@@ -3,21 +3,12 @@ package org.machinemc.scriptive.components;
 import org.machinemc.scriptive.Contents;
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
-import org.machinemc.scriptive.style.ChatStyle;
-import org.machinemc.scriptive.style.Colour;
-import org.machinemc.scriptive.style.TextFormat;
+import org.machinemc.scriptive.style.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-public interface Component<T> extends Contents, Cloneable {
-
-    T getValue();
-
-    void setValue(T t);
+public interface Component extends Contents, Cloneable {
 
     Optional<Colour> getColor();
 
@@ -59,25 +50,22 @@ public interface Component<T> extends Contents, Cloneable {
 
     void setHoverEvent(@Nullable HoverEvent hoverEvent);
 
-    List<Component<?>> getSiblings();
+    List<Component> getSiblings();
 
     default boolean hasSiblings() {
         return getSiblings().size() > 0;
     }
 
-    default Component<T> append(String literal) {
+    default Component append(String literal) {
         append(TextComponent.of(literal));
         return this;
     }
 
-    Component<T> append(Component<?> component);
+    Component append(Component component);
 
     void clearSiblings();
 
-    default void merge(Component<?> other) {
-        if (getClass().isInstance(other))
-            //noinspection unchecked
-            setValue((T) other.getValue());
+    default void merge(Component other) {
         if (other.hasSiblings()) {
             clearSiblings();
             other.getSiblings().forEach(this::append);
@@ -123,7 +111,7 @@ public interface Component<T> extends Contents, Cloneable {
         format.getStyle(ChatStyle.ITALIC).ifPresent(this::setItalic);
     }
 
-    default ComponentModifier<T> modify() {
+    default ComponentModifier<?> modify() {
         return new ComponentModifier<>(this);
     }
 
@@ -146,78 +134,76 @@ public interface Component<T> extends Contents, Cloneable {
 
     String toLegacyString();
 
-    Component<T> clone();
+    String flatten();
 
-    class ComponentModifier<T> {
+    Component clone();
 
-        private final Component<T> original, clone;
+    class ComponentModifier<C extends Component> {
 
-        private ComponentModifier(Component<T> component) {
+        protected final C original, clone;
+
+        @SuppressWarnings("unchecked")
+        protected ComponentModifier(C component) {
             this.original = component;
-            this.clone = original.clone();
+            this.clone = (C) original.clone();
         }
 
-        public ComponentModifier<T> value(T t) {
-            clone.setValue(t);
-            return this;
-        }
-
-        public ComponentModifier<T> color(@Nullable Colour color) {
+        public ComponentModifier<C> color(@Nullable Colour color) {
             clone.setColor(color);
             return this;
         }
 
-        public ComponentModifier<T> bold(@Nullable Boolean bold) {
+        public ComponentModifier<C> bold(@Nullable Boolean bold) {
             clone.setBold(bold);
             return this;
         }
 
-        public ComponentModifier<T> italic(@Nullable Boolean italic) {
+        public ComponentModifier<C> italic(@Nullable Boolean italic) {
             clone.setItalic(italic);
             return this;
         }
 
-        public ComponentModifier<T> underlined(@Nullable Boolean underlined) {
+        public ComponentModifier<C> underlined(@Nullable Boolean underlined) {
             clone.setUnderlined(underlined);
             return this;
         }
 
-        public ComponentModifier<T> strikethrough(@Nullable Boolean strikethrough) {
+        public ComponentModifier<C> strikethrough(@Nullable Boolean strikethrough) {
             clone.setStrikethrough(strikethrough);
             return this;
         }
 
-        public ComponentModifier<T> obfuscated(@Nullable Boolean obfuscated) {
+        public ComponentModifier<C> obfuscated(@Nullable Boolean obfuscated) {
             clone.setObfuscated(obfuscated);
             return this;
         }
 
-        public ComponentModifier<T> insertion(@Nullable String insertion) {
+        public ComponentModifier<C> insertion(@Nullable String insertion) {
             clone.setInsertion(insertion);
             return this;
         }
 
-        public ComponentModifier<T> clickEvent(@Nullable ClickEvent clickEvent) {
+        public ComponentModifier<C> clickEvent(@Nullable ClickEvent clickEvent) {
             clone.setClickEvent(clickEvent);
             return this;
         }
 
-        public ComponentModifier<T> hoverEvent(@Nullable HoverEvent hoverEvent) {
+        public ComponentModifier<C> hoverEvent(@Nullable HoverEvent hoverEvent) {
             clone.setHoverEvent(hoverEvent);
             return this;
         }
 
-        public ComponentModifier<T> append(String literal) {
+        public ComponentModifier<C> append(String literal) {
             clone.append(literal);
             return this;
         }
 
-        public ComponentModifier<T> append(Component<?> other) {
+        public ComponentModifier<C> append(Component other) {
             clone.append(other);
             return this;
         }
 
-        public Component<T> finish() {
+        public C finish() {
             original.merge(clone);
             return original;
         }

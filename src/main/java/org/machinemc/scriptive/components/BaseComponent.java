@@ -1,18 +1,18 @@
 package org.machinemc.scriptive.components;
 
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
 import org.machinemc.scriptive.style.ChatStyle;
 import org.machinemc.scriptive.style.Colour;
 import org.machinemc.scriptive.style.TextFormat;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
-public abstract class BaseComponent<T> implements Component<T> {
+public abstract class BaseComponent implements Component {
 
-    private final List<Component<?>> siblings;
+    private final List<Component> siblings;
     private @Nullable Colour color;
     private @Nullable Boolean bold, italic, underlined, strikethrough, obfuscated;
     private @Nullable String font, insertion;
@@ -23,7 +23,7 @@ public abstract class BaseComponent<T> implements Component<T> {
         this(new ArrayList<>());
     }
 
-    protected BaseComponent(List<Component<?>> siblings) {
+    protected BaseComponent(List<Component> siblings) {
         this.siblings = siblings;
     }
 
@@ -114,12 +114,12 @@ public abstract class BaseComponent<T> implements Component<T> {
     }
 
     @Override
-    public @UnmodifiableView List<Component<?>> getSiblings() {
+    public @UnmodifiableView List<Component> getSiblings() {
         return Collections.unmodifiableList(siblings);
     }
 
     @Override
-    public Component<T> append(Component<?> component) {
+    public Component append(Component component) {
         siblings.add(component.clone());
         return this;
     }
@@ -131,21 +131,21 @@ public abstract class BaseComponent<T> implements Component<T> {
 
     @Override
     public String toLegacyString() {
-        List<Component<?>> components = separateComponent(this);
+        List<Component> components = separateComponent(this);
         StringBuilder builder = new StringBuilder();
-        for (Component<?> component : components)
+        for (Component component : components)
             builder.append(toLegacyString(component));
         return builder.toString();
     }
 
     @Override
-    public abstract BaseComponent<T> clone();
+    public abstract BaseComponent clone();
 
-    private static <T> List<Component<?>> separateComponent(Component<T> component) {
-        List<Component<?>> components = new LinkedList<>();
-        Component<T> parent = component.clone();
+    private static List<Component> separateComponent(Component component) {
+        List<Component> components = new LinkedList<>();
+        Component parent = component.clone();
         components.add(parent);
-        for (Component<?> child : parent.getSiblings()) {
+        for (Component child : parent.getSiblings()) {
             child.getColor().ifPresentOrElse(k -> {}, () -> child.setColor(parent.getColor().orElse(null)));
             child.isBold().ifPresentOrElse(k -> {}, () -> child.setBold(parent.isBold().orElse(null)));
             child.isItalic().ifPresentOrElse(k -> {}, () -> child.setItalic(parent.isItalic().orElse(null)));
@@ -162,13 +162,19 @@ public abstract class BaseComponent<T> implements Component<T> {
         return components;
     }
 
-    private static String toLegacyString(Component<?> component) {
+    private static String toLegacyString(Component component) {
         StringBuilder builder = new StringBuilder();
         TextFormat format = component.getFormat();
-        format.getColor().ifPresent(builder::append);
+        format.getColor().ifPresent(color -> {
+            if (color.isDefaultColor()) {
+                builder.append(color);
+            } else {
+                builder.append("&x&").append(String.join("&", color.getHexString().split("")));
+            }
+        });
         for (ChatStyle style : format.getStyles(true))
             builder.append(style);
-        builder.append(component.getValue());
+        builder.append(component.flatten());
         return builder.toString();
     }
 

@@ -2,7 +2,7 @@ package org.machinemc.scriptive.components;
 
 import java.util.Map;
 
-public class TextComponent extends BaseComponent<String> {
+public class TextComponent extends BaseComponent {
 
     private String text;
 
@@ -15,14 +15,25 @@ public class TextComponent extends BaseComponent<String> {
         return text;
     }
 
+    public void setText(String text) {
+        this.text = text;
+    }
+
     @Override
-    public String getValue() {
+    public String flatten() {
         return text;
     }
 
     @Override
-    public void setValue(String text) {
-        this.text = text;
+    public void merge(Component other) {
+        super.merge(other);
+        if (getClass().isInstance(other))
+            setText(((TextComponent) other).getText());
+    }
+
+    @Override
+    public ComponentModifier modify() {
+        return new ComponentModifier(this);
     }
 
     @Override
@@ -41,6 +52,23 @@ public class TextComponent extends BaseComponent<String> {
 
     public static TextComponent of(String text) {
         return new TextComponent(text);
+    }
+
+    public static TextComponent empty() {
+        return of("");
+    }
+
+    public static class ComponentModifier extends Component.ComponentModifier<TextComponent> {
+
+        protected ComponentModifier(TextComponent component) {
+            super(component);
+        }
+
+        public ComponentModifier text(String text) {
+            clone.setText(text);
+            return this;
+        }
+
     }
 
 }

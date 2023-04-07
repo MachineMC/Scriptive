@@ -52,11 +52,28 @@ public class TextFormat {
         return list.toArray(new ChatStyle[0]);
     }
 
+    public void merge(TextFormat other) {
+        other.getColor().ifPresent(this::setColor);
+        other.styleMap.forEach((chatStyle, flag) -> {
+            if (flag != null)
+                styleMap.put(chatStyle, flag);
+        });
+    }
+
     private static Map<ChatStyle, @Nullable Boolean> stylesToMap(ChatStyle... styles) {
         Map<ChatStyle, @Nullable Boolean> styleMap = new HashMap<>();
         for (ChatStyle style : styles)
             styleMap.put(style, true);
         return styleMap;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("TextFormat{");
+        sb.append("color=").append(color);
+        sb.append(", styleMap=").append(styleMap);
+        sb.append('}');
+        return sb.toString();
     }
 
 }

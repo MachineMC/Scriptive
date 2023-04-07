@@ -2,7 +2,7 @@ package org.machinemc.scriptive.components;
 
 import java.util.Map;
 
-public class KeybindComponent extends BaseComponent<String> {
+public class KeybindComponent extends BaseComponent {
 
     private String keybind;
 
@@ -15,14 +15,25 @@ public class KeybindComponent extends BaseComponent<String> {
         return keybind;
     }
 
+    public void setKeybind(String keybind) {
+        this.keybind = keybind;
+    }
+
     @Override
-    public String getValue() {
+    public String flatten() {
         return keybind;
     }
 
     @Override
-    public void setValue(String keybind) {
-        this.keybind = keybind;
+    public void merge(Component other) {
+        super.merge(other);
+        if (getClass().isInstance(other))
+            setKeybind(((KeybindComponent) other).getKeybind());
+    }
+
+    @Override
+    public ComponentModifier modify() {
+        return new ComponentModifier(this);
     }
 
     @Override
@@ -41,6 +52,19 @@ public class KeybindComponent extends BaseComponent<String> {
 
     public static KeybindComponent of(String keybind) {
         return new KeybindComponent(keybind);
+    }
+
+    public static class ComponentModifier extends Component.ComponentModifier<KeybindComponent> {
+
+        protected ComponentModifier(KeybindComponent component) {
+            super(component);
+        }
+
+        public ComponentModifier keybind(String keybind) {
+            clone.setKeybind(keybind);
+            return this;
+        }
+
     }
 
 }
