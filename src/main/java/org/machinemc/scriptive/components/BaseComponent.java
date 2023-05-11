@@ -2,6 +2,7 @@ package org.machinemc.scriptive.components;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.machinemc.scriptive.Contents;
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
 import org.machinemc.scriptive.style.ChatStyle;
@@ -130,36 +131,61 @@ public abstract class BaseComponent implements Component {
     }
 
     @Override
+    public void merge(Component other) {
+        if (other.hasSiblings()) {
+            clearSiblings();
+            other.getSiblings().forEach(sibling -> append(sibling.clone()));
+        }
+        if (other.getColor().isPresent())
+            setColor(other.getColor().get());
+        if (other.isBold().isPresent())
+            setBold(other.isBold().get());
+        if (other.isItalic().isPresent())
+            setItalic(other.isItalic().get());
+        if (other.isUnderlined().isPresent())
+            setUnderlined(other.isUnderlined().get());
+        if (other.isStrikethrough().isPresent())
+            setStrikethrough(other.isStrikethrough().get());
+        if (other.isObfuscated().isPresent())
+            setObfuscated(other.isObfuscated().get());
+        if (other.getFont().isPresent())
+            setFont(other.getFont().get());
+        if (other.getInsertion().isPresent())
+            setInsertion(other.getInsertion().get());
+        if (other.getClickEvent().isPresent())
+            setClickEvent(other.getClickEvent().get());
+        if (other.getHoverEvent().isPresent())
+            setHoverEvent(other.getHoverEvent().get());
+    }
+
+    @Override
+    public TextFormat getFormat() {
+        Map<ChatStyle, @Nullable Boolean> map = new HashMap<>();
+        isObfuscated().ifPresent(obfuscated -> map.put(ChatStyle.OBFUSCATED, obfuscated));
+        isBold().ifPresent(bold -> map.put(ChatStyle.BOLD, bold));
+        isStrikethrough().ifPresent(strikethrough -> map.put(ChatStyle.STRIKETHROUGH, strikethrough));
+        isUnderlined().ifPresent(underlined -> map.put(ChatStyle.UNDERLINED, underlined));
+        isItalic().ifPresent(italic -> map.put(ChatStyle.ITALIC, italic));
+        return new TextFormat(getColor().orElse(null), map);
+    }
+
+    @Override
+    public void applyFormat(TextFormat format) {
+        format.getColor().ifPresent(this::setColor);
+        format.getStyle(ChatStyle.BOLD).ifPresent(this::setBold);
+        format.getStyle(ChatStyle.OBFUSCATED).ifPresent(this::setObfuscated);
+        format.getStyle(ChatStyle.STRIKETHROUGH).ifPresent(this::setStrikethrough);
+        format.getStyle(ChatStyle.UNDERLINED).ifPresent(this::setUnderlined);
+        format.getStyle(ChatStyle.ITALIC).ifPresent(this::setItalic);
+    }
+
+    @Override
     public String toLegacyString() {
-        List<Component> components = separateComponent(this);
+        List<Component> components = separatedComponents();
         StringBuilder builder = new StringBuilder();
         for (Component component : components)
             builder.append(toLegacyString(component));
         return builder.toString();
-    }
-
-    @Override
-    public abstract BaseComponent clone();
-
-    private static List<Component> separateComponent(Component component) {
-        List<Component> components = new LinkedList<>();
-        Component parent = component.clone();
-        components.add(parent);
-        for (Component child : parent.getSiblings()) {
-            child.getColor().ifPresentOrElse(k -> {}, () -> child.setColor(parent.getColor().orElse(null)));
-            child.isBold().ifPresentOrElse(k -> {}, () -> child.setBold(parent.isBold().orElse(null)));
-            child.isItalic().ifPresentOrElse(k -> {}, () -> child.setItalic(parent.isItalic().orElse(null)));
-            child.isUnderlined().ifPresentOrElse(k -> {}, () -> child.setUnderlined(parent.isUnderlined().orElse(null)));
-            child.isStrikethrough().ifPresentOrElse(k -> {}, () -> child.setStrikethrough(parent.isStrikethrough().orElse(null)));
-            child.isObfuscated().ifPresentOrElse(k -> {}, () -> child.setObfuscated(parent.isObfuscated().orElse(null)));
-            child.getFont().ifPresentOrElse(k -> {}, () -> child.setFont(parent.getFont().orElse(null)));
-            child.getInsertion().ifPresentOrElse(k -> {}, () -> child.setInsertion(parent.getInsertion().orElse(null)));
-            child.getClickEvent().ifPresentOrElse(k -> {}, () -> child.setClickEvent(parent.getClickEvent().orElse(null)));
-            child.getHoverEvent().ifPresentOrElse(k -> {}, () -> child.setHoverEvent(parent.getHoverEvent().orElse(null)));
-            components.addAll(separateComponent(child));
-        }
-        parent.clearSiblings();
-        return components;
     }
 
     private static String toLegacyString(Component component) {
@@ -176,6 +202,51 @@ public abstract class BaseComponent implements Component {
             builder.append(style);
         builder.append(component.flatten());
         return builder.toString();
+    }
+
+    @Override
+    public List<Component> separatedComponents() {
+        List<Component> components = new LinkedList<>();
+        addSeparatedComponents(clone(), components);
+        return components;
+    }
+
+    private static void addSeparatedComponents(Component parent, List<Component> components) {
+        components.add(parent);
+        for (Component child : parent.getSiblings()) {
+            child.getColor().ifPresentOrElse(k -> {}, () -> child.setColor(parent.getColor().orElse(null)));
+            child.isBold().ifPresentOrElse(k -> {}, () -> child.setBold(parent.isBold().orElse(null)));
+            child.isItalic().ifPresentOrElse(k -> {}, () -> child.setItalic(parent.isItalic().orElse(null)));
+            child.isUnderlined().ifPresentOrElse(k -> {}, () -> child.setUnderlined(parent.isUnderlined().orElse(null)));
+            child.isStrikethrough().ifPresentOrElse(k -> {}, () -> child.setStrikethrough(parent.isStrikethrough().orElse(null)));
+            child.isObfuscated().ifPresentOrElse(k -> {}, () -> child.setObfuscated(parent.isObfuscated().orElse(null)));
+            child.getFont().ifPresentOrElse(k -> {}, () -> child.setFont(parent.getFont().orElse(null)));
+            child.getInsertion().ifPresentOrElse(k -> {}, () -> child.setInsertion(parent.getInsertion().orElse(null)));
+            child.getClickEvent().ifPresentOrElse(k -> {}, () -> child.setClickEvent(parent.getClickEvent().orElse(null)));
+            child.getHoverEvent().ifPresentOrElse(k -> {}, () -> child.setHoverEvent(parent.getHoverEvent().orElse(null)));
+            addSeparatedComponents(child, components);
+        }
+        parent.clearSiblings();
+    }
+
+    @Override
+    public abstract BaseComponent clone();
+
+    @Override
+    public Map<String, Object> asMap() {
+        Map<String, Object> map = new HashMap<>();
+        getColor().ifPresent(color -> map.put("color", color.getName()));
+        isBold().ifPresent(bold -> map.put("bold", bold));
+        isItalic().ifPresent(italic -> map.put("italic", italic));
+        isUnderlined().ifPresent(underlined -> map.put("underlined", underlined));
+        isStrikethrough().ifPresent(strikethrough -> map.put("strikethrough", strikethrough));
+        isObfuscated().ifPresent(obfuscated -> map.put("obfuscated", obfuscated));
+        getInsertion().ifPresent(insertion -> map.put("insertion", insertion));
+        getClickEvent().ifPresent(clickEvent -> map.put("clickEvent", clickEvent.asMap()));
+        getHoverEvent().ifPresent(hoverEvent -> map.put("hoverEvent", hoverEvent.asMap()));
+        if (hasSiblings())
+            map.put("extra", getSiblings().stream().map(Contents::asMap).toArray(Map[]::new));
+        return map;
     }
 
 }

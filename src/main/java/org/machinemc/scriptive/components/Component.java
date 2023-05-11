@@ -65,72 +65,17 @@ public interface Component extends Contents, Cloneable {
 
     void clearSiblings();
 
-    default void merge(Component other) {
-        if (other.hasSiblings()) {
-            clearSiblings();
-            other.getSiblings().forEach(this::append);
-        }
-        if (other.getColor().isPresent())
-            setColor(other.getColor().get());
-        if (other.isBold().isPresent())
-            setBold(other.isBold().get());
-        if (other.isItalic().isPresent())
-            setItalic(other.isItalic().get());
-        if (other.isUnderlined().isPresent())
-            setUnderlined(other.isUnderlined().get());
-        if (other.isStrikethrough().isPresent())
-            setStrikethrough(other.isStrikethrough().get());
-        if (other.isObfuscated().isPresent())
-            setObfuscated(other.isObfuscated().get());
-        if (other.getFont().isPresent())
-            setFont(other.getFont().get());
-        if (other.getInsertion().isPresent())
-            setInsertion(other.getInsertion().get());
-        if (other.getClickEvent().isPresent())
-            setClickEvent(other.getClickEvent().get());
-        if (other.getHoverEvent().isPresent())
-            setHoverEvent(other.getHoverEvent().get());
-    }
+    void merge(Component other);
 
-    default TextFormat getFormat() {
-        Map<ChatStyle, @Nullable Boolean> map = new HashMap<>();
-        isObfuscated().ifPresent(obfuscated -> map.put(ChatStyle.OBFUSCATED, obfuscated));
-        isBold().ifPresent(bold -> map.put(ChatStyle.BOLD, bold));
-        isStrikethrough().ifPresent(strikethrough -> map.put(ChatStyle.STRIKETHROUGH, strikethrough));
-        isUnderlined().ifPresent(underlined -> map.put(ChatStyle.UNDERLINED, underlined));
-        isItalic().ifPresent(italic -> map.put(ChatStyle.ITALIC, italic));
-        return new TextFormat(getColor().orElse(null), map);
-    }
+    TextFormat getFormat();
 
-    default void applyFormat(TextFormat format) {
-        format.getColor().ifPresent(this::setColor);
-        format.getStyle(ChatStyle.BOLD).ifPresent(this::setBold);
-        format.getStyle(ChatStyle.OBFUSCATED).ifPresent(this::setObfuscated);
-        format.getStyle(ChatStyle.STRIKETHROUGH).ifPresent(this::setStrikethrough);
-        format.getStyle(ChatStyle.UNDERLINED).ifPresent(this::setUnderlined);
-        format.getStyle(ChatStyle.ITALIC).ifPresent(this::setItalic);
-    }
+    void applyFormat(TextFormat format);
 
     default ComponentModifier<?> modify() {
         return new ComponentModifier<>(this);
     }
 
-    @Override
-    default Map<String, Object> asMap() {
-        Map<String, Object> map = new HashMap<>();
-        getColor().ifPresent(color -> map.put("color", color.getName()));
-        isBold().ifPresent(bold -> map.put("bold", bold));
-        isItalic().ifPresent(italic -> map.put("italic", italic));
-        isUnderlined().ifPresent(underlined -> map.put("underlined", underlined));
-        isStrikethrough().ifPresent(strikethrough -> map.put("strikethrough", strikethrough));
-        isObfuscated().ifPresent(obfuscated -> map.put("obfuscated", obfuscated));
-        getInsertion().ifPresent(insertion -> map.put("insertion", insertion));
-        getClickEvent().ifPresent(clickEvent -> map.put("clickEvent", clickEvent.asMap()));
-        getHoverEvent().ifPresent(hoverEvent -> map.put("hoverEvent", hoverEvent.asMap()));
-        if (hasSiblings())
-            map.put("extra", getSiblings().stream().map(Contents::asMap).toArray(Map[]::new));
-        return map;
-    }
+    List<Component> separatedComponents();
 
     String toLegacyString();
 

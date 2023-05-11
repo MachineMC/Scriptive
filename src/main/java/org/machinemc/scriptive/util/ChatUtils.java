@@ -5,6 +5,7 @@ import org.machinemc.scriptive.components.TextComponent;
 import org.machinemc.scriptive.style.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -120,9 +121,8 @@ public final class ChatUtils {
      */
     public static String consoleFormatted(Component component) {
         final StringBuilder formatted = new StringBuilder();
-        final List<Component> components = new ArrayList<>();
-        components.add(component);
-        components.addAll(component.getSiblings());
+        final List<Component> components = new LinkedList<>(component.separatedComponents());
+
         for (Component next : components) {
             final TextFormat format = next.getFormat();
             formatted.append(ChatColor.RESET.getConsoleFormat());
@@ -133,6 +133,7 @@ public final class ChatUtils {
             });
             formatted.append(consoleFormatted(next.flatten()));
         }
+
         return formatted.toString();
     }
 

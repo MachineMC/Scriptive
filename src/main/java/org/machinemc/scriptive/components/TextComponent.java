@@ -27,8 +27,8 @@ public class TextComponent extends BaseComponent {
     @Override
     public void merge(Component other) {
         super.merge(other);
-        if (getClass().isInstance(other))
-            setText(((TextComponent) other).getText());
+        if (other instanceof TextComponent textComponent)
+            setText(textComponent.getText());
     }
 
     @Override
