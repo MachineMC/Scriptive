@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.machinemc"
-version = "1.0.1"
+version = "1.1"
 
 repositories {
     mavenCentral()
@@ -37,7 +37,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "org.machinemc"
             artifactId = "scriptive"
-            version = "1.0.1"
+            version = "1.1"
             from(components["java"])
         }
     }

@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 public final class ChatUtils {
 
     public static final char COLOR_CHAR = 167; // §
-    private static final char CONSOLE_COLOR_CHAR = '\033';
 
     private static final Pattern AMP_COLOR_CODE_PATTERN = Pattern.compile("(?i)&([\\dabcdefklmnor])");
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("(?i)" + COLOR_CHAR + "([\\dabcdefklmnor])");
@@ -108,9 +107,9 @@ public final class ChatUtils {
     public static String consoleFormatted(String string) {
         return COLOR_CODE_PATTERN.matcher(colored(string)).replaceAll(matchResult -> {
             ChatCode chatCode = ChatCode.byChar(matchResult.group(1));
-            if (chatCode == null || chatCode.getConsoleCode() < 0)
+            if (chatCode == null)
                 return matchResult.group();
-            return CONSOLE_COLOR_CHAR + "[" + (chatCode.isColor() ? "0;" : "") + chatCode.getConsoleCode() + "m";
+            return chatCode.getConsoleFormat();
         });
     }
 
@@ -120,16 +119,21 @@ public final class ChatUtils {
      * @return formatted component as string for console
      */
     public static String consoleFormatted(Component component) {
-        return consoleFormatted(component.toLegacyString());
-    }
-
-    /**
-     * Converts text color to a ascii string for terminal.
-     * @param color color to convert
-     * @return color converted to ascii color format
-     */
-    public static String asciiColor(Colour color) {
-        return "\u001B[38;2;" + color.getRed() + ";" + color.getGreen() + ";" + color.getBlue() + "m";
+        final StringBuilder formatted = new StringBuilder();
+        final List<Component> components = new ArrayList<>();
+        components.add(component);
+        components.addAll(component.getSiblings());
+        for (Component next : components) {
+            final TextFormat format = next.getFormat();
+            formatted.append(ChatColor.RESET.getConsoleFormat());
+            format.getColor().ifPresent((color) -> formatted.append(color.getConsoleFormat()));
+            format.getStyles().forEach((style, enabled) -> {
+                if (enabled == null) return;
+                if (enabled) formatted.append(style.getConsoleFormat());
+            });
+            formatted.append(consoleFormatted(next.flatten()));
+        }
+        return formatted.toString();
     }
 
 }

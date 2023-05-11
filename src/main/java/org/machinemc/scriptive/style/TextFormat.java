@@ -69,11 +69,9 @@ public class TextFormat {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("TextFormat{");
-        sb.append("color=").append(color);
-        sb.append(", styleMap=").append(styleMap);
-        sb.append('}');
-        return sb.toString();
+        return "TextFormat{" + "color=" + color +
+                ", styleMap=" + styleMap +
+                '}';
     }
 
 }

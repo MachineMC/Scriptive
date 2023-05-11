@@ -3,7 +3,7 @@ package org.machinemc.scriptive.style;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-public interface ChatCode {
+public interface ChatCode extends TerminalFormatting {
 
     /**
      * @return character code of the chat code
@@ -13,7 +13,7 @@ public interface ChatCode {
     /**
      * @return console code of the chat code
      */
-    int getConsoleCode();
+    String getConsoleCode();
 
     /**
      * @return numeric code of the chat code
@@ -31,7 +31,6 @@ public interface ChatCode {
     boolean isFormat();
 
     TextFormat asTextFormat();
-
 
     /**
      * Returns the chat code for the given character, null

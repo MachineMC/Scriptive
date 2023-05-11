@@ -3,7 +3,7 @@ package org.machinemc.scriptive.style;
 import java.awt.Color;
 import java.util.Locale;
 
-public interface Colour {
+public interface Colour extends TerminalFormatting {
 
     /**
      * Returns whether the color is a {@link ChatColor} or another implementation
@@ -65,6 +65,11 @@ public interface Colour {
      */
     default String getHexString() {
         return "%02x%02x%02x".formatted(getRed(), getGreen(), getBlue()).toUpperCase(Locale.ENGLISH);
+    }
+
+    @Override
+    default String getConsoleCode() {
+        return "38;2;" + getRed() + ";" + getGreen() + ";" + getBlue();
     }
 
 }

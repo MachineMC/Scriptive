@@ -10,30 +10,34 @@ import java.util.Locale;
  */
 public enum ChatColor implements ChatCode, Colour {
 
-    BLACK('0', 30, 0x000000),
-    DARK_BLUE('1', 34, 0x0000AA),
-    DARK_GREEN('2', 32, 0x00AA00),
-    DARK_AQUA('3', 36, 0x00AAAA),
-    DARK_RED('4', 31, 0xAA0000),
-    DARK_PURPLE('5', 35, 0xAA00AA),
-    GOLD('6', 33, 0xFFAA00),
-    GRAY('7', 37, 0xAAAAAA),
-    DARK_GRAY('8', 90, 0x555555),
-    BLUE('9', 94, 0x5555FF),
-    GREEN('a', 92, 0x55FF55),
-    AQUA('b', 96, 0x55FFFF),
-    RED('c', 91, 0xFF5555),
-    LIGHT_PURPLE('d', 95, 0xFF55FF),
-    YELLOW('e', 93, 0xFFFF55),
-    WHITE('f', 97, 0xFFFFFF),
-    RESET('r', 0, -1);
+    BLACK('0', 0x000000),
+    DARK_BLUE('1', 0x0000AA),
+    DARK_GREEN('2', 0x00AA00),
+    DARK_AQUA('3', 0x00AAAA),
+    DARK_RED('4', 0xAA0000),
+    DARK_PURPLE('5', 0xAA00AA),
+    GOLD('6', 0xFFAA00),
+    GRAY('7', 0xAAAAAA),
+    DARK_GRAY('8', 0x555555),
+    BLUE('9', 0x5555FF),
+    GREEN('a', 0x55FF55),
+    AQUA('b', 0x55FFFF),
+    RED('c', 0xFF5555),
+    LIGHT_PURPLE('d', 0xFF55FF),
+    YELLOW('e', 0xFFFF55),
+    WHITE('f', 0xFFFFFF),
+    RESET('r', "0", -1);
 
     private final char code;
-    private final int consoleCode;
+    private final @Nullable String consoleCode;
     private final int hexCode;
     private final boolean isColor;
 
-    ChatColor(char code, int consoleCode, int hexCode) {
+    ChatColor(char code, int hexCode) {
+        this(code, null, hexCode);
+    }
+
+    ChatColor(char code, @Nullable String consoleCode, int hexCode) {
         this.code = code;
         this.consoleCode = consoleCode;
         this.hexCode = hexCode;
@@ -46,8 +50,8 @@ public enum ChatColor implements ChatCode, Colour {
     }
 
     @Override
-    public int getConsoleCode() {
-        return consoleCode;
+    public String getConsoleCode() {
+        return consoleCode != null ? consoleCode : Colour.super.getConsoleCode();
     }
 
     @Override

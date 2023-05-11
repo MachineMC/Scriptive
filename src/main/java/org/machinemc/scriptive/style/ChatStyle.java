@@ -5,16 +5,16 @@ import org.jetbrains.annotations.Range;
 
 public enum ChatStyle implements ChatCode {
 
-    OBFUSCATED('k', 5),
-    BOLD('l', 1),
-    STRIKETHROUGH('m', 9),
-    UNDERLINED('n', 4),
-    ITALIC('o', 3);
+    OBFUSCATED('k', "5"),
+    BOLD('l', "1"),
+    STRIKETHROUGH('m', "9"),
+    UNDERLINED('n', "4"),
+    ITALIC('o', "3");
 
     private final char code;
-    private final int consoleCode;
+    private final String consoleCode;
 
-    ChatStyle(char code, int consoleCode) {
+    ChatStyle(char code, String consoleCode) {
         this.code = code;
         this.consoleCode = consoleCode;
     }
@@ -25,7 +25,7 @@ public enum ChatStyle implements ChatCode {
     }
 
     @Override
-    public int getConsoleCode() {
+    public String getConsoleCode() {
         return consoleCode;
     }
 

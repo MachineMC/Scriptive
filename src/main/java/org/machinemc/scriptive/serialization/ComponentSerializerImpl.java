@@ -11,6 +11,7 @@ import org.machinemc.scriptive.style.HexColor;
 
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class ComponentSerializerImpl implements ComponentSerializer {
 
     private final Map<String[], Class<? extends Component>> componentKeysMap = new HashMap<>();
@@ -21,7 +22,6 @@ public class ComponentSerializerImpl implements ComponentSerializer {
         register(TextComponent.class, properties -> TextComponent.of((String) properties.get("text")), "text");
         register(TranslationComponent.class, properties -> {
             String translate = (String) properties.get("translate");
-            //noinspection unchecked
             List<Map<String, Object>> argumentsMap = (List<Map<String, Object>>) properties.getOrDefault("with", new ArrayList<>());
             Component[] arguments = new Component[argumentsMap.size()];
             int index = 0;
@@ -45,7 +45,6 @@ public class ComponentSerializerImpl implements ComponentSerializer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <C extends Component> C deserialize(Map<String, Object> map) {
         C component = newInstance(map);
 
@@ -83,7 +82,6 @@ public class ComponentSerializerImpl implements ComponentSerializer {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Component> ComponentCreator<T> getCreator(Class<T> type) {
         ComponentCreator<T> creator = (ComponentCreator<T>) componentCreators.get(type);
         if (creator == null)
@@ -91,7 +89,6 @@ public class ComponentSerializerImpl implements ComponentSerializer {
         return creator;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends Component> T newInstance(Map<String, Object> properties) {
         Class<T> type = (Class<T>) getComponentTypeFromMap(properties);
         if (type == null)
