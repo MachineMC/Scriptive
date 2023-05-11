@@ -1,6 +1,6 @@
 package org.machinemc.scriptive.style;
 
-public interface TerminalFormatting {
+public interface TerminalFormat {
 
     char CONSOLE_COLOR_CHAR = '\033';
 

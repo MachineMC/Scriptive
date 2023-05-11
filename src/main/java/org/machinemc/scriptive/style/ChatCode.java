@@ -3,7 +3,7 @@ package org.machinemc.scriptive.style;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-public interface ChatCode extends TerminalFormatting {
+public interface ChatCode extends TerminalFormat {
 
     /**
      * @return character code of the chat code

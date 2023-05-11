@@ -3,7 +3,7 @@ package org.machinemc.scriptive.style;
 import java.awt.Color;
 import java.util.Locale;
 
-public interface Colour extends TerminalFormatting {
+public interface Colour extends TerminalFormat {
 
     /**
      * Returns whether the color is a {@link ChatColor} or another implementation
