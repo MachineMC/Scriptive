@@ -1,5 +1,6 @@
 package org.machinemc.scriptive.style;
 
+import org.jetbrains.annotations.Nullable;
 import org.machinemc.scriptive.exceptions.MalformedHexCodeException;
 
 import java.awt.Color;
@@ -50,6 +51,23 @@ public class HexColor implements Colour {
         } catch (NumberFormatException e) {
             throw new MalformedHexCodeException(hex, e);
         }
+    }
+
+    public static boolean isValidHex(String hex) {
+        int start = hex.startsWith("#") ? 1 : 0;
+        if (hex.length() - start != 6)
+            return false;
+        for (int i = start; i < 6 + start; i++) {
+            if (Character.digit(hex.charAt(i), 16) < 0)
+                return false;
+        }
+        return true;
+    }
+
+    public static @Nullable HexColor of(String hex) {
+        if (!isValidHex(hex))
+            return null;
+        return new HexColor(hex);
     }
 
 }
