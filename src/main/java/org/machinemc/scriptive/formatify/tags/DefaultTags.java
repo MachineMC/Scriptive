@@ -2,11 +2,9 @@ package org.machinemc.scriptive.formatify.tags;
 
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.formatify.Result;
-import org.machinemc.scriptive.formatify.arguments.*;
+import org.machinemc.scriptive.formatify.arguments.ColorArgument;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public final class DefaultTags {
 

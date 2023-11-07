@@ -48,23 +48,48 @@ public class ComponentSerializerImpl implements ComponentSerializer {
     public <C extends Component> C deserialize(Map<String, Object> map) {
         C component = newInstance(map);
 
-        if (map.containsKey("color")) {
-            String color = (String) map.get("color");
-            if (color != null)
-                component.setColor(color.startsWith("#") ? new HexColor(color) : ChatColor.valueOf(color.toUpperCase(Locale.ENGLISH)));
-        }
+        Optional.ofNullable(map.get("color"))
+                .map(String::valueOf)
+                .flatMap(color -> color.startsWith("#") ? HexColor.of(color) : ChatColor.byName(color))
+                .ifPresent(component::setColor);
 
-        component.setBold((Boolean) map.getOrDefault("bold", component.isBold().orElse(null)));
-        component.setItalic((Boolean) map.getOrDefault("italic", component.isItalic().orElse(null)));
-        component.setUnderlined((Boolean) map.getOrDefault("underlined", component.isUnderlined().orElse(null)));
-        component.setStrikethrough((Boolean) map.getOrDefault("strikethrough", component.isStrikethrough().orElse(null)));
-        component.setObfuscated((Boolean) map.getOrDefault("obfuscated", component.isObfuscated().orElse(null)));
-        component.setInsertion((String) map.getOrDefault("insertion", component.getInsertion().orElse(null)));
-        component.setClickEvent((ClickEvent) map.getOrDefault("clickEvent", component.getClickEvent().orElse(null)));
-        component.setHoverEvent((HoverEvent) map.getOrDefault("hoverEvent", component.getHoverEvent().orElse(null)));
+        Optional.ofNullable(map.get("bold"))
+                .filter(o -> o instanceof Boolean)
+                .map(o -> (Boolean) o)
+                .ifPresent(component::setBold);
+        Optional.ofNullable(map.get("italic"))
+                .filter(o -> o instanceof Boolean)
+                .map(o -> (Boolean) o)
+                .ifPresent(component::setItalic);
+        Optional.ofNullable(map.get("underlined"))
+                .filter(o -> o instanceof Boolean)
+                .map(o -> (Boolean) o)
+                .ifPresent(component::setUnderlined);
+        Optional.ofNullable(map.get("strikethrough"))
+                .filter(o -> o instanceof Boolean)
+                .map(o -> (Boolean) o)
+                .ifPresent(component::setStrikethrough);
+        Optional.ofNullable(map.get("obfuscated"))
+                .filter(o -> o instanceof Boolean)
+                .map(o -> (Boolean) o)
+                .ifPresent(component::setObfuscated);
 
-        component.clearSiblings();
+        Optional.ofNullable(map.get("insertion"))
+                .map(String::valueOf)
+                .ifPresent(component::setInsertion);
+
+        // TODO fix deserialization of these two
+        Optional.ofNullable(map.get("clickEvent"))
+                .filter(o -> o instanceof ClickEvent)
+                .map(o -> (ClickEvent) o)
+                .ifPresent(component::setClickEvent);
+        Optional.ofNullable(map.get("hoverEvent"))
+                .filter(o -> o instanceof HoverEvent<?>)
+                .map(o -> (HoverEvent<?>) o)
+                .ifPresent(component::setHoverEvent);
+
         if (map.containsKey("extra")) {
+            component.clearSiblings();
             for (Map<String, Object> extra : ((List<Map<String, Object>>) map.get("extra")))
                 component.append((Component) deserialize(extra));
         }
@@ -92,7 +117,7 @@ public class ComponentSerializerImpl implements ComponentSerializer {
     public <T extends Component> T newInstance(Map<String, Object> properties) {
         Class<T> type = (Class<T>) getComponentTypeFromMap(properties);
         if (type == null)
-            throw new IllegalArgumentException("Ambiguous map, couldn't deserialize");
+            throw new IllegalArgumentException("Don't know how to turn " + properties + " into a component");
         return newInstance(type, properties);
     }
 

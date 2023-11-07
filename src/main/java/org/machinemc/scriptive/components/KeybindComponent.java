@@ -1,5 +1,7 @@
 package org.machinemc.scriptive.components;
 
+import org.machinemc.scriptive.style.TextFormat;
+
 import java.util.Map;
 
 public class KeybindComponent extends BaseComponent {
@@ -20,8 +22,23 @@ public class KeybindComponent extends BaseComponent {
     }
 
     @Override
-    public String flatten() {
+    public String getString() {
         return keybind;
+    }
+
+    @Override
+    public KeybindComponent append(String literal) {
+        return (KeybindComponent) super.append(literal);
+    }
+
+    @Override
+    public KeybindComponent append(String literal, TextFormat textFormat) {
+        return (KeybindComponent) super.append(literal, textFormat);
+    }
+
+    @Override
+    public KeybindComponent append(Component component) {
+        return (KeybindComponent) super.append(component);
     }
 
     @Override
@@ -54,14 +71,19 @@ public class KeybindComponent extends BaseComponent {
         return new KeybindComponent(keybind);
     }
 
-    public static class ComponentModifier extends Component.ComponentModifier<KeybindComponent> {
+    public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, KeybindComponent> {
 
         protected ComponentModifier(KeybindComponent component) {
             super(component);
         }
 
         public ComponentModifier keybind(String keybind) {
-            clone.setKeybind(keybind);
+            component.setKeybind(keybind);
+            return getThis();
+        }
+
+        @Override
+        protected ComponentModifier getThis() {
             return this;
         }
 

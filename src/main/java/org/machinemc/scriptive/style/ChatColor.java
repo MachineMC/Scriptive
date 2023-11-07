@@ -3,7 +3,10 @@ package org.machinemc.scriptive.style;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Default color values for Minecraft chat.
@@ -27,6 +30,13 @@ public enum ChatColor implements ChatCode, Colour {
     YELLOW('e', 0xFFFF55),
     WHITE('f', 0xFFFFFF),
     RESET('r', "0", -1);
+
+    private static final Map<String, ChatColor> NAME_MAP = new HashMap<>(ChatColor.values().length);
+
+    static {
+        for (ChatColor value : values())
+            NAME_MAP.put(value.getName(), value);
+    }
 
     private final char code;
     private final @Nullable String consoleCode;
@@ -100,12 +110,12 @@ public enum ChatColor implements ChatCode, Colour {
      * @param code character to get the chat color for
      * @return chat color mapped to given character
      */
-    public static @Nullable ChatColor byChar(char code) {
+    public static Optional<ChatColor> byChar(char code) {
         for (ChatColor value : values()) {
             if (value.code == code)
-                return value;
+                return Optional.of(value);
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -114,9 +124,9 @@ public enum ChatColor implements ChatCode, Colour {
      * @param code character to get the chat color for
      * @return chat color mapped to given character
      */
-    public static @Nullable ChatColor byChar(String code) {
+    public static Optional<ChatColor> byChar(String code) {
         if (code.length() != 1)
-            return null;
+            return Optional.empty();
         return byChar(code.charAt(0));
     }
 
@@ -129,6 +139,14 @@ public enum ChatColor implements ChatCode, Colour {
         if (code >= values().length)
             throw new IllegalArgumentException("Unsupported ChatColor");
         return values()[code];
+    }
+
+    /**
+     * @param name name of chat color
+     * @return chat color with given name
+     */
+    public static Optional<ChatColor> byName(String name) {
+        return Optional.ofNullable(NAME_MAP.get(name.toLowerCase(Locale.ENGLISH)));
     }
 
 }

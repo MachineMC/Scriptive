@@ -1,7 +1,8 @@
 package org.machinemc.scriptive.style;
 
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+
+import java.util.Optional;
 
 public interface ChatCode extends TerminalFormat {
 
@@ -38,11 +39,8 @@ public interface ChatCode extends TerminalFormat {
      * @param code character to get the chat code for
      * @return chat code mapped to given character
      */
-    static @Nullable ChatCode byChar(char code) {
-        ChatCode chatCode = ChatColor.byChar(code);
-        if (chatCode == null)
-            return ChatStyle.byChar(code);
-        return chatCode;
+    static Optional<ChatCode> byChar(char code) {
+        return ChatColor.byChar(code).map(chatColor -> (ChatCode) chatColor).or(() -> ChatStyle.byChar(code));
     }
 
     /**
@@ -51,9 +49,9 @@ public interface ChatCode extends TerminalFormat {
      * @param code character to get the chat code for
      * @return chat code mapped to given character
      */
-    static @Nullable ChatCode byChar(String code) {
+    static Optional<ChatCode> byChar(String code) {
         if (code.length() != 1)
-            return null;
+            return Optional.empty();
         return byChar(code.charAt(0));
     }
 

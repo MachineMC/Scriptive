@@ -12,7 +12,7 @@ public class ColorArgument implements Argument<Colour> {
     @Override
     public Result<Colour> parse(String unparsed) {
         if (HexColor.isValidHex(unparsed))
-            return Result.of(HexColor.of(unparsed));
+            return Result.of(HexColor.of(unparsed).orElse(null));
 
         try {
             ChatColor color = ChatColor.valueOf(unparsed.toUpperCase(Locale.ENGLISH));

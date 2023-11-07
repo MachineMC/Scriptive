@@ -73,8 +73,7 @@ public final class ChatUtils {
             char[] colorCodes = pair.left().toCharArray();
 
             for (char code : colorCodes) {
-                ChatCode chatCode = ChatCode.byChar(code);
-                assert chatCode != null;
+                ChatCode chatCode = ChatCode.byChar(code).orElseThrow();
                 if (chatCode.isColor() || chatCode == ChatColor.RESET) {
                     format = chatCode.asTextFormat();
                 } else {
@@ -83,7 +82,7 @@ public final class ChatUtils {
             }
 
             TextComponent child = TextComponent.of(pair.right());
-            child.applyFormat(format);
+            child.setTextFormat(format);
             component.append(child);
         }
 
@@ -106,12 +105,9 @@ public final class ChatUtils {
      * @return formatted string for console
      */
     public static String consoleFormatted(String string) {
-        return COLOR_CODE_PATTERN.matcher(colored(string)).replaceAll(matchResult -> {
-            ChatCode chatCode = ChatCode.byChar(matchResult.group(1));
-            if (chatCode == null)
-                return matchResult.group();
-            return chatCode.getConsoleFormat();
-        });
+        return COLOR_CODE_PATTERN.matcher(colored(string)).replaceAll(matchResult -> ChatCode.byChar(matchResult.group(1))
+                .map(ChatCode::getConsoleFormat)
+                .orElse(matchResult.group()));
     }
 
     /**
@@ -120,21 +116,19 @@ public final class ChatUtils {
      * @return formatted component as string for console
      */
     public static String consoleFormatted(Component component) {
-        final StringBuilder formatted = new StringBuilder();
-        final List<Component> components = new LinkedList<>(component.separatedComponents());
+        final StringBuilder builder = new StringBuilder();
+        final List<Component> components = new LinkedList<>(component.toFlatList());
 
         for (Component next : components) {
-            final TextFormat format = next.getFormat();
-            formatted.append(ChatColor.RESET.getConsoleFormat());
-            format.getColor().ifPresent((color) -> formatted.append(color.getConsoleFormat()));
-            format.getStyles().forEach((style, enabled) -> {
-                if (enabled == null) return;
-                if (enabled) formatted.append(style.getConsoleFormat());
-            });
-            formatted.append(consoleFormatted(next.flatten()));
+            final TextFormat format = next.getTextFormat();
+            builder.append(ChatColor.RESET.getConsoleFormat());
+            format.getColor().ifPresent((color) -> builder.append(color.getConsoleFormat()));
+            for (ChatStyle style : format.getStyles(true))
+                builder.append(style.getConsoleFormat());
+            builder.append(next.getString());
         }
 
-        return formatted.toString();
+        return builder.toString();
     }
 
 }

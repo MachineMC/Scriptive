@@ -1,5 +1,7 @@
 package org.machinemc.scriptive.components;
 
+import org.machinemc.scriptive.style.TextFormat;
+
 import java.util.Map;
 
 public class TextComponent extends BaseComponent {
@@ -20,8 +22,23 @@ public class TextComponent extends BaseComponent {
     }
 
     @Override
-    public String flatten() {
+    public String getString() {
         return text;
+    }
+
+    @Override
+    public TextComponent append(String literal) {
+        return (TextComponent) super.append(literal);
+    }
+
+    @Override
+    public TextComponent append(String literal, TextFormat textFormat) {
+        return (TextComponent) super.append(literal, textFormat);
+    }
+
+    @Override
+    public TextComponent append(Component component) {
+        return (TextComponent) super.append(component);
     }
 
     @Override
@@ -54,18 +71,29 @@ public class TextComponent extends BaseComponent {
         return new TextComponent(text);
     }
 
+    public static TextComponent of(String text, TextFormat textFormat) {
+        TextComponent component = new TextComponent(text);
+        component.setTextFormat(textFormat);
+        return component;
+    }
+
     public static TextComponent empty() {
         return of("");
     }
 
-    public static class ComponentModifier extends Component.ComponentModifier<TextComponent> {
+    public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, TextComponent> {
 
         protected ComponentModifier(TextComponent component) {
             super(component);
         }
 
         public ComponentModifier text(String text) {
-            clone.setText(text);
+            component.setText(text);
+            return getThis();
+        }
+
+        @Override
+        protected ComponentModifier getThis() {
             return this;
         }
 

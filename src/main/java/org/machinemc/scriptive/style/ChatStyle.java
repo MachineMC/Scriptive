@@ -1,22 +1,29 @@
 package org.machinemc.scriptive.style;
 
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+
+import java.util.Optional;
 
 public enum ChatStyle implements ChatCode {
 
-    OBFUSCATED('k', "5"),
-    BOLD('l', "1"),
-    STRIKETHROUGH('m', "9"),
-    UNDERLINED('n', "4"),
-    ITALIC('o', "3");
+    OBFUSCATED("obfuscated", 'k', "5"),
+    BOLD("bold", 'l', "1"),
+    STRIKETHROUGH("strikethrough", 'm', "9"),
+    UNDERLINED("underlined", 'n', "4"),
+    ITALIC("italic", 'o', "3");
 
+    private final String name;
     private final char code;
     private final String consoleCode;
 
-    ChatStyle(char code, String consoleCode) {
+    ChatStyle(String name, char code, String consoleCode) {
+        this.name = name;
         this.code = code;
         this.consoleCode = consoleCode;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -60,12 +67,12 @@ public enum ChatStyle implements ChatCode {
      * @param code character to get the chat style for
      * @return chat style mapped to given character
      */
-    public static @Nullable ChatStyle byChar(char code) {
+    public static Optional<ChatStyle> byChar(char code) {
         for (ChatStyle value : values()) {
             if (value.code == code)
-                return value;
+                return Optional.of(value);
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -74,9 +81,9 @@ public enum ChatStyle implements ChatCode {
      * @param code character to get the chat style for
      * @return chat style mapped to given character
      */
-    public static @Nullable ChatStyle byChar(String code) {
+    public static Optional<ChatStyle> byChar(String code) {
         if (code.length() != 1)
-            return null;
+            return Optional.empty();
         return byChar(code.charAt(0));
     }
 

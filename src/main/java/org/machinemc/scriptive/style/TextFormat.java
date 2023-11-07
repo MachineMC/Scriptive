@@ -2,12 +2,14 @@ package org.machinemc.scriptive.style;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.machinemc.scriptive.Contents;
 
 import java.util.*;
 
-public class TextFormat {
+public class TextFormat implements Contents {
 
     private @Nullable Colour color;
+    private @Nullable String font;
     private final Map<ChatStyle, @Nullable Boolean> styleMap;
 
     public TextFormat(ChatStyle... styles) {
@@ -15,11 +17,16 @@ public class TextFormat {
     }
 
     public TextFormat(@Nullable Colour color, ChatStyle... styles) {
-        this(color, stylesToMap(styles));
+        this(color, null, stylesToMap(styles));
     }
 
-    public TextFormat(@Nullable Colour color, Map<ChatStyle, @Nullable Boolean> styleMap) {
+    public TextFormat(@Nullable Colour color, @Nullable String font, ChatStyle... styles) {
+        this(color, font, stylesToMap(styles));
+    }
+
+    public TextFormat(@Nullable Colour color, @Nullable String font, Map<ChatStyle, @Nullable Boolean> styleMap) {
         this.color = color;
+        this.font = font;
         this.styleMap = styleMap;
     }
 
@@ -29,6 +36,14 @@ public class TextFormat {
 
     public void setColor(@Nullable Colour color) {
         this.color = color;
+    }
+
+    public Optional<String> getFont() {
+        return Optional.ofNullable(font);
+    }
+
+    public void setFont(@Nullable String font) {
+        this.font = font;
     }
 
     public Optional<Boolean> getStyle(ChatStyle style) {
@@ -52,8 +67,18 @@ public class TextFormat {
         return list.toArray(new ChatStyle[0]);
     }
 
+    public void inheritFrom(TextFormat parent) {
+        getColor().ifPresentOrElse(k -> {}, () -> setColor(parent.color));
+        getFont().ifPresentOrElse(k -> {}, () -> setFont(parent.font));
+        parent.styleMap.forEach((chatStyle, flag) -> {
+            if (flag == null || getStyle(chatStyle).isPresent()) return;
+            setStyle(chatStyle, flag);
+        });
+    }
+
     public void merge(TextFormat other) {
         other.getColor().ifPresent(this::setColor);
+        other.getFont().ifPresent(this::setFont);
         other.styleMap.forEach((chatStyle, flag) -> {
             if (flag != null)
                 styleMap.put(chatStyle, flag);
@@ -69,9 +94,23 @@ public class TextFormat {
 
     @Override
     public String toString() {
-        return "TextFormat{" + "color=" + color +
-                ", styleMap=" + styleMap +
-                '}';
+        return new StringJoiner(", ", "TextFormat[", "]")
+                .add("color=" + color)
+                .add("font='" + font + "'")
+                .add("styleMap=" + styleMap)
+                .toString();
+    }
+
+    @Override
+    public Map<String, Object> asMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("color", color);
+        map.put("font", font);
+        styleMap.forEach((chatStyle, flag) -> {
+            if (flag != null)
+                map.put(chatStyle.getName(), flag);
+        });
+        return map;
     }
 
 }

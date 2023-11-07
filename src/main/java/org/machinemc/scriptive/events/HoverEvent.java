@@ -14,6 +14,14 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
         this(action, valueHolder.asHoverEventValue());
     }
 
+    public HoverEvent<V> withValue(V value) {
+        return new HoverEvent<>(action, value);
+    }
+
+    public HoverEvent<V> withValue(ValueHolder<V> valueHolder) {
+        return new HoverEvent<>(action, valueHolder);
+    }
+
     @Override
     public Map<String, Object> asMap() {
         return Map.of(

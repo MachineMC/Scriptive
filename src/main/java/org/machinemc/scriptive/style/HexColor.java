@@ -1,9 +1,9 @@
 package org.machinemc.scriptive.style;
 
-import org.jetbrains.annotations.Nullable;
 import org.machinemc.scriptive.exceptions.MalformedHexCodeException;
 
 import java.awt.Color;
+import java.util.Optional;
 
 public class HexColor implements Colour {
 
@@ -64,10 +64,10 @@ public class HexColor implements Colour {
         return true;
     }
 
-    public static @Nullable HexColor of(String hex) {
+    public static Optional<HexColor> of(String hex) {
         if (!isValidHex(hex))
-            return null;
-        return new HexColor(hex);
+            return Optional.empty();
+        return Optional.of(new HexColor(hex));
     }
 
 }

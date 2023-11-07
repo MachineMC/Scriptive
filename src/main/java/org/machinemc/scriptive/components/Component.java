@@ -1,5 +1,6 @@
 package org.machinemc.scriptive.components;
 
+import org.jetbrains.annotations.Contract;
 import org.machinemc.scriptive.Contents;
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
@@ -9,6 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<HoverEvent.Text> {
+
+    TextFormat getTextFormat();
+
+    @Contract("null -> fail")
+    void setTextFormat(TextFormat textFormat);
 
     Optional<Colour> getColor();
 
@@ -46,40 +52,47 @@ public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<H
 
     void setClickEvent(@Nullable ClickEvent clickEvent);
 
-    Optional<HoverEvent> getHoverEvent();
+    Optional<HoverEvent<?>> getHoverEvent();
 
-    void setHoverEvent(@Nullable HoverEvent hoverEvent);
+    void setHoverEvent(@Nullable HoverEvent<?> hoverEvent);
 
     List<Component> getSiblings();
 
     default boolean hasSiblings() {
-        return getSiblings().size() > 0;
+        return !getSiblings().isEmpty();
     }
 
     default Component append(String literal) {
-        append(TextComponent.of(literal));
-        return this;
+        return append(TextComponent.of(literal));
+    }
+
+    default Component append(String literal, TextFormat textFormat) {
+        return append(TextComponent.of(literal, textFormat));
     }
 
     Component append(Component component);
 
     void clearSiblings();
 
+    void inheritFrom(Component parent);
+
     void merge(Component other);
 
-    TextFormat getFormat();
-
-    void applyFormat(TextFormat format);
-
-    default ComponentModifier<?> modify() {
-        return new ComponentModifier<>(this);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    default ComponentModifier modify() {
+        return new ComponentModifier(this) {
+            @Override
+            protected ComponentModifier getThis() {
+                return this;
+            }
+        };
     }
 
-    List<Component> separatedComponents();
+    List<Component> toFlatList();
 
     String toLegacyString();
 
-    String flatten();
+    String getString();
 
     Component clone();
 
@@ -88,71 +101,76 @@ public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<H
         return new HoverEvent.Text(this);
     }
 
-        protected final C original, clone;
+    abstract class ComponentModifier<M extends ComponentModifier<M, C>, C extends Component> {
+
+        protected final C component;
+        private final C original;
 
         @SuppressWarnings("unchecked")
         protected ComponentModifier(C component) {
             this.original = component;
-            this.clone = (C) original.clone();
+            this.component = (C) original.clone();
         }
 
-        public ComponentModifier<C> color(@Nullable Colour color) {
-            clone.setColor(color);
-            return this;
+        public M color(@Nullable Colour color) {
+            component.setColor(color);
+            return getThis();
         }
 
-        public ComponentModifier<C> bold(@Nullable Boolean bold) {
-            clone.setBold(bold);
-            return this;
+        public M bold(@Nullable Boolean bold) {
+            component.setBold(bold);
+            return getThis();
         }
 
-        public ComponentModifier<C> italic(@Nullable Boolean italic) {
-            clone.setItalic(italic);
-            return this;
+        public M italic(@Nullable Boolean italic) {
+            component.setItalic(italic);
+            return getThis();
         }
 
-        public ComponentModifier<C> underlined(@Nullable Boolean underlined) {
-            clone.setUnderlined(underlined);
-            return this;
+        public M underlined(@Nullable Boolean underlined) {
+            component.setUnderlined(underlined);
+            return getThis();
         }
 
-        public ComponentModifier<C> strikethrough(@Nullable Boolean strikethrough) {
-            clone.setStrikethrough(strikethrough);
-            return this;
+        public M strikethrough(@Nullable Boolean strikethrough) {
+            component.setStrikethrough(strikethrough);
+            return getThis();
         }
 
-        public ComponentModifier<C> obfuscated(@Nullable Boolean obfuscated) {
-            clone.setObfuscated(obfuscated);
-            return this;
+        public M obfuscated(@Nullable Boolean obfuscated) {
+            component.setObfuscated(obfuscated);
+            return getThis();
         }
 
-        public ComponentModifier<C> insertion(@Nullable String insertion) {
-            clone.setInsertion(insertion);
-            return this;
+        public M insertion(@Nullable String insertion) {
+            component.setInsertion(insertion);
+            return getThis();
         }
 
-        public ComponentModifier<C> clickEvent(@Nullable ClickEvent clickEvent) {
-            clone.setClickEvent(clickEvent);
-            return this;
+        public M clickEvent(@Nullable ClickEvent clickEvent) {
+            component.setClickEvent(clickEvent);
+            return getThis();
         }
 
-        public ComponentModifier<C> hoverEvent(@Nullable HoverEvent hoverEvent) {
-            clone.setHoverEvent(hoverEvent);
-            return this;
+        public M hoverEvent(@Nullable HoverEvent<?> hoverEvent) {
+            component.setHoverEvent(hoverEvent);
+            return getThis();
         }
 
-        public ComponentModifier<C> append(String literal) {
-            clone.append(literal);
-            return this;
+        public M append(String literal) {
+            component.append(literal);
+            return getThis();
         }
 
-        public ComponentModifier<C> append(Component other) {
-            clone.append(other);
-            return this;
+        public M append(Component other) {
+            component.append(other);
+            return getThis();
         }
+
+        protected abstract M getThis();
 
         public C finish() {
-            original.merge(clone);
+            original.merge(component);
             return original;
         }
 

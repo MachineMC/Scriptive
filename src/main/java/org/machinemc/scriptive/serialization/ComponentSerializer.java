@@ -1,9 +1,9 @@
 package org.machinemc.scriptive.serialization;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+import org.machinemc.scriptive.GsonInstance;
 import org.machinemc.scriptive.components.Component;
 
 import java.util.Map;
@@ -18,8 +18,8 @@ public interface ComponentSerializer {
         return deserializeJson(JsonParser.parseString(json));
     }
 
-    default  <C extends Component> C deserializeJson(JsonElement json) {
-        return deserialize(new Gson().fromJson(json, new TypeToken<Map<String, Object>>() {}.getType()));
+    default <C extends Component> C deserializeJson(JsonElement json) {
+        return deserialize(GsonInstance.get().fromJson(json, new TypeToken<Map<String, Object>>() {}.getType()));
     }
 
     <C extends Component> C deserialize(Map<String, Object> map);
