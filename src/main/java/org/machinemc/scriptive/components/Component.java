@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public interface Component extends Contents, Cloneable {
+public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<HoverEvent.Text> {
 
     Optional<Colour> getColor();
 
@@ -83,7 +83,10 @@ public interface Component extends Contents, Cloneable {
 
     Component clone();
 
-    class ComponentModifier<C extends Component> {
+    @Override
+    default HoverEvent.Text asHoverEventValue() {
+        return new HoverEvent.Text(this);
+    }
 
         protected final C original, clone;
 
