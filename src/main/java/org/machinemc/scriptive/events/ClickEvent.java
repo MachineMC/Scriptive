@@ -2,6 +2,7 @@ package org.machinemc.scriptive.events;
 
 import org.machinemc.scriptive.Contents;
 
+import java.util.Locale;
 import java.util.Map;
 
 public record ClickEvent(Action action, String value) implements Contents {
@@ -20,6 +21,19 @@ public record ClickEvent(Action action, String value) implements Contents {
                 "action", action,
                 "value", value
         );
+    }
+
+    public static ClickEvent deserialize(Map<String, String> map) {
+        Action action;
+        try {
+            action = map.containsKey("action") ? Action.valueOf(map.get("action").toUpperCase(Locale.ENGLISH)) : null;
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+        String value = map.get("action");
+        if (value == null)
+            return null;
+        return new ClickEvent(action, value);
     }
 
     public enum Action {

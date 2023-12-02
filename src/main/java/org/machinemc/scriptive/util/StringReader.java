@@ -51,16 +51,6 @@ public class StringReader implements Cloneable {
         return input.charAt(cursor++);
     }
 
-    public char next() {
-        skipWhitespace();
-        return read();
-    }
-
-    public void skipWhitespace() {
-        while (canRead() && Character.isWhitespace(peek()))
-            read();
-    }
-
     public void reset() {
         cursor = 0;
     }

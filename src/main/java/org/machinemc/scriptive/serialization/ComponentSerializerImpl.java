@@ -10,6 +10,7 @@ import org.machinemc.scriptive.style.ChatColor;
 import org.machinemc.scriptive.style.HexColor;
 
 import java.util.*;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class ComponentSerializerImpl implements ComponentSerializer {
@@ -78,14 +79,15 @@ public class ComponentSerializerImpl implements ComponentSerializer {
                 .map(String::valueOf)
                 .ifPresent(component::setInsertion);
 
-        // TODO fix deserialization of these two
         Optional.ofNullable(map.get("clickEvent"))
-                .filter(o -> o instanceof ClickEvent)
-                .map(o -> (ClickEvent) o)
+                .filter(o -> o instanceof Map<?, ?>)
+                .map(o -> (Map<String, String>) o)
+                .map(ClickEvent::deserialize)
                 .ifPresent(component::setClickEvent);
         Optional.ofNullable(map.get("hoverEvent"))
-                .filter(o -> o instanceof HoverEvent<?>)
-                .map(o -> (HoverEvent<?>) o)
+                .filter(o -> o instanceof Map<?, ?>)
+                .map(o -> (Map<String, Object>) o)
+                .map(hoverEventMap -> HoverEvent.deserialize(this, hoverEventMap))
                 .ifPresent(component::setHoverEvent);
 
         if (map.containsKey("extra")) {

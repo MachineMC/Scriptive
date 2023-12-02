@@ -3,6 +3,8 @@ package org.machinemc.scriptive.events;
 import org.jetbrains.annotations.Nullable;
 import org.machinemc.scriptive.Contents;
 import org.machinemc.scriptive.components.Component;
+import org.machinemc.scriptive.components.TextComponent;
+import org.machinemc.scriptive.serialization.ComponentSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,13 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
         );
     }
 
+    @SuppressWarnings("unchecked")
+    public static <V extends Value> HoverEvent<?> deserialize(ComponentSerializer serializer, Map<String, Object> map) {
+        HoverEvent.Action<V> action = (Action<V>) Action.byName(map.get("action") + "");
+        if (action == null) return null;
+        return new HoverEvent<>(action, action.parseValue(serializer, map.get("contents")));
+    }
+
     public static final class Action<V extends Value> {
 
         public static final Action<Text> SHOW_TEXT = new Action<>("show_text", Text.class);
@@ -53,12 +62,51 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
         }
 
         @SuppressWarnings("unchecked")
+        public V parseValue(ComponentSerializer serializer, Object value) {
+            if (value == null || (this != SHOW_TEXT && !(value instanceof Map<?, ?>))) return null;
+            if (this == SHOW_TEXT) {
+                if (value instanceof String string)
+                    return (V) new Text(TextComponent.of(string));
+                if (!(value instanceof Map<?, ?> map)) return null;
+                return serializer.deserialize((Map<String, Object>) map);
+            } else if (this == SHOW_ITEM) {
+                Map<String, Object> map = (Map<String, Object>) value;
+                if (!map.containsKey("id") || !map.containsKey("count")) return null;
+                String id = map.get("id") + "";
+                int count = Integer.parseInt(map.get("count") + "");
+                String tag = map.containsKey("tag") ? map.get("tag") + "" : null;
+                return (V) new Item(id, count, tag);
+            } else if (this == SHOW_ENTITY) {
+                Map<String, Object> map = (Map<String, Object>) value;
+                UUID id = map.containsKey("id") ? UUID.fromString(map.get("id") + "") : null;
+                if (id == null) return null;
+                String type = map.containsKey("type") ? map.get("type") + "" : null;
+                String name = map.containsKey("name") ? map.get("name") + "" : null;
+                return (V) new Entity(id, type, name);
+            }
+            throw new UnsupportedOperationException();
+        }
+
+        public static Action<?> byName(String name) {
+            return switch (name) {
+                case "show_text" -> SHOW_TEXT;
+                case "show_item" -> SHOW_ITEM;
+                case "show_entity" -> SHOW_ENTITY;
+                default -> null;
+            };
+        }
+
+        @SuppressWarnings("unchecked")
         public static <V extends Value> Action<V> ofValue(V value) {
             return (Action<V>) switch (value) {
                 case Text text -> SHOW_TEXT;
                 case Item item -> SHOW_ITEM;
                 case Entity entity -> SHOW_ENTITY;
             };
+        }
+
+        public static Action<?>[] values() {
+            return new Action[]{SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY};
         }
 
     }
