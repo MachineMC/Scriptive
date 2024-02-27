@@ -1,5 +1,6 @@
 package org.machinemc.scriptive.serialization;
 
+import org.jetbrains.annotations.Nullable;
 import org.machinemc.scriptive.components.Component;
 import org.machinemc.scriptive.components.KeybindComponent;
 import org.machinemc.scriptive.components.TextComponent;
@@ -10,13 +11,13 @@ import org.machinemc.scriptive.style.ChatColor;
 import org.machinemc.scriptive.style.HexColor;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unchecked")
-public class ComponentSerializerImpl implements ComponentSerializer {
+class ComponentSerializerImpl implements ComponentSerializer {
 
-    private final Map<String[], Class<? extends Component>> componentKeysMap = new HashMap<>();
-    private final Map<Class<? extends Component>, ComponentCreator<?>> componentCreators = new HashMap<>();
+    private final Map<String, Class<? extends Component>> componentKeysMap = new HashMap<>();
+    private final Map<Class<? extends Component>, ComponentCreator<?>> componentCreators = new LinkedHashMap<>();
 
     {
         register(KeybindComponent.class, properties -> KeybindComponent.of((String) properties.get("keybind")), "keybind");
@@ -25,9 +26,8 @@ public class ComponentSerializerImpl implements ComponentSerializer {
             String translate = (String) properties.get("translate");
             List<Map<String, Object>> argumentsMap = (List<Map<String, Object>>) properties.getOrDefault("with", new ArrayList<>());
             Component[] arguments = new Component[argumentsMap.size()];
-            int index = 0;
-            for (Map<String, Object> map : argumentsMap)
-                arguments[index++] = deserialize(map);
+            for (int i = 0; i < argumentsMap.size(); i++)
+                arguments[i] = deserialize(argumentsMap.get(i));
             return TranslationComponent.of(translate, arguments);
         }, "translate", "with");
     }
@@ -36,7 +36,8 @@ public class ComponentSerializerImpl implements ComponentSerializer {
     public <T extends Component> void register(Class<T> type, ComponentCreator<T> creator, String... uniqueKeys) {
         if (componentCreators.containsKey(type))
             throw new IllegalArgumentException("Type '" + type + "' is already registered");
-        componentKeysMap.put(uniqueKeys, type);
+        for (String key : uniqueKeys)
+            componentKeysMap.putIfAbsent(key, type);
         componentCreators.put(type, creator);
     }
 
@@ -54,41 +55,23 @@ public class ComponentSerializerImpl implements ComponentSerializer {
                 .flatMap(color -> color.startsWith("#") ? HexColor.of(color) : ChatColor.byName(color))
                 .ifPresent(component::setColor);
 
-        Optional.ofNullable(map.get("bold"))
-                .filter(o -> o instanceof Boolean)
-                .map(o -> (Boolean) o)
-                .ifPresent(component::setBold);
-        Optional.ofNullable(map.get("italic"))
-                .filter(o -> o instanceof Boolean)
-                .map(o -> (Boolean) o)
-                .ifPresent(component::setItalic);
-        Optional.ofNullable(map.get("underlined"))
-                .filter(o -> o instanceof Boolean)
-                .map(o -> (Boolean) o)
-                .ifPresent(component::setUnderlined);
-        Optional.ofNullable(map.get("strikethrough"))
-                .filter(o -> o instanceof Boolean)
-                .map(o -> (Boolean) o)
-                .ifPresent(component::setStrikethrough);
-        Optional.ofNullable(map.get("obfuscated"))
-                .filter(o -> o instanceof Boolean)
-                .map(o -> (Boolean) o)
-                .ifPresent(component::setObfuscated);
+        deserializePart(map.get("bold"), Boolean.class, component::setBold);
+        deserializePart(map.get("italic"), Boolean.class, component::setItalic);
+        deserializePart(map.get("underlined"), Boolean.class, component::setUnderlined);
+        deserializePart(map.get("strikethrough"), Boolean.class, component::setStrikethrough);
+        deserializePart(map.get("obfuscated"), Boolean.class, component::setObfuscated);
+        deserializePart(map.get("insertion"), String.class, component::setInsertion);
 
-        Optional.ofNullable(map.get("insertion"))
-                .map(String::valueOf)
-                .ifPresent(component::setInsertion);
-
-        Optional.ofNullable(map.get("clickEvent"))
-                .filter(o -> o instanceof Map<?, ?>)
-                .map(o -> (Map<String, String>) o)
-                .map(ClickEvent::deserialize)
-                .ifPresent(component::setClickEvent);
-        Optional.ofNullable(map.get("hoverEvent"))
-                .filter(o -> o instanceof Map<?, ?>)
-                .map(o -> (Map<String, Object>) o)
-                .map(hoverEventMap -> HoverEvent.deserialize(this, hoverEventMap))
-                .ifPresent(component::setHoverEvent);
+        deserializePart(
+                map.get("clickEvent"),
+                Map.class,
+                properties -> component.setClickEvent(ClickEvent.deserialize(properties))
+        );
+        deserializePart(
+                map.get("hoverEvent"),
+                Map.class,
+                properties -> component.setHoverEvent(HoverEvent.deserialize(this, properties))
+        );
 
         if (map.containsKey("extra")) {
             component.clearSiblings();
@@ -99,12 +82,10 @@ public class ComponentSerializerImpl implements ComponentSerializer {
         return component;
     }
 
-    public Class<? extends Component> getComponentTypeFromMap(Map<String, Object> properties) {
-        for (Map.Entry<String[], Class<? extends Component>> entry : componentKeysMap.entrySet()) {
-            for (String key : entry.getKey()) {
-                if (properties.containsKey(key))
-                    return entry.getValue();
-            }
+    public Class<? extends Component> getComponentTypeFromProperties(Map<String, Object> properties) {
+        for (String key : properties.keySet()) {
+            Class<? extends Component> type = componentKeysMap.get(key);
+            if (type != null) return type;
         }
         return null;
     }
@@ -117,7 +98,7 @@ public class ComponentSerializerImpl implements ComponentSerializer {
     }
 
     public <T extends Component> T newInstance(Map<String, Object> properties) {
-        Class<T> type = (Class<T>) getComponentTypeFromMap(properties);
+        Class<T> type = (Class<T>) getComponentTypeFromProperties(properties);
         if (type == null)
             throw new IllegalArgumentException("Don't know how to turn " + properties + " into a component");
         return newInstance(type, properties);
@@ -125,6 +106,13 @@ public class ComponentSerializerImpl implements ComponentSerializer {
 
     public <T extends Component> T newInstance(Class<T> type, Map<String, Object> properties) {
         return getCreator(type).create(properties);
+    }
+
+    private static <T> void deserializePart(@Nullable Object part, Class<T> expected, Consumer<T> consumer) {
+        Optional.ofNullable(part)
+                .filter(expected::isInstance)
+                .map(expected::cast)
+                .ifPresent(consumer);
     }
 
 }

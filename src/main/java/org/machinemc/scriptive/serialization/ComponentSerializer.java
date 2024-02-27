@@ -22,6 +22,10 @@ public interface ComponentSerializer {
         return deserialize(GsonInstance.get().fromJson(json, new TypeToken<Map<String, Object>>() {}.getType()));
     }
 
-    <C extends Component> C deserialize(Map<String, Object> map);
+    <C extends Component> C deserialize(Map<String, Object> properties);
+
+    static ComponentSerializer createDefault() {
+        return new ComponentSerializerImpl();
+    }
 
 }
