@@ -113,4 +113,19 @@ public class TextFormat implements Contents {
         return map;
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TextFormat that)) return false;
+        return Objects.equals(color, that.color) && Objects.equals(font, that.font) && styleMap.equals(that.styleMap);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(color);
+        result = 31 * result + Objects.hashCode(font);
+        result = 31 * result + styleMap.hashCode();
+        return result;
+    }
+
 }

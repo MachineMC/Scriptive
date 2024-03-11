@@ -223,4 +223,16 @@ public abstract class BaseComponent implements Component {
         return map;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BaseComponent that)) return false;
+        return asMap().equals(that.asMap());
+    }
+
+    @Override
+    public int hashCode() {
+        return asMap().hashCode();
+    }
+
 }

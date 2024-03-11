@@ -8,6 +8,7 @@ import org.machinemc.scriptive.serialization.ComponentSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V contents) implements Contents {
@@ -107,6 +108,28 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
 
         public static Action<?>[] values() {
             return new Action[]{SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY};
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Action<?> action)) return false;
+            return name.equals(action.name) && type.equals(action.type);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = name.hashCode();
+            result = 31 * result + type.hashCode();
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", "Action[", "]")
+                    .add("name=" + name)
+                    .add("type=" + type.getSimpleName())
+                    .toString();
         }
 
     }

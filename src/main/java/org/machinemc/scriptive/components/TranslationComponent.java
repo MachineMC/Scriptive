@@ -227,6 +227,42 @@ public class TranslationComponent extends BaseComponent {
         return new TranslationComponent(localeLanguage, translation, fallback, arguments);
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TranslationComponent that)) return false;
+        return Objects.equals(localeLanguage, that.localeLanguage)
+                && translation.equals(that.translation)
+                && Objects.equals(fallback, that.fallback)
+                && Arrays.equals(arguments, that.arguments)
+                && Objects.equals(decomposedParts, that.decomposedParts)
+
+                // base component
+                && getSiblings().equals(that.getSiblings())
+                && getTextFormat().equals(that.getTextFormat())
+                && Objects.equals(getInsertion(), that.getInsertion())
+                && Objects.equals(getClickEvent(), that.getClickEvent())
+                && Objects.equals(getHoverEvent(), that.getHoverEvent());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(localeLanguage);
+        result = 31 * result + translation.hashCode();
+        result = 31 * result + Objects.hashCode(fallback);
+        result = 31 * result + Arrays.hashCode(arguments);
+        result = 31 * result + Objects.hashCode(decomposedParts);
+
+        // base component
+        result = 31 * result + getSiblings().hashCode();
+        result = 31 * result + getTextFormat().hashCode();
+        result = 31 * result + Objects.hashCode(getInsertion());
+        result = 31 * result + Objects.hashCode(getClickEvent());
+        result = 31 * result + Objects.hashCode(getHoverEvent());
+
+        return result;
+    }
+
     public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, TranslationComponent> {
 
         protected ComponentModifier(TranslationComponent component) {

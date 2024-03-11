@@ -3,6 +3,7 @@ package org.machinemc.scriptive.components;
 import org.machinemc.scriptive.style.TextFormat;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class KeybindComponent extends BaseComponent {
 
@@ -69,6 +70,34 @@ public class KeybindComponent extends BaseComponent {
 
     public static KeybindComponent of(String keybind) {
         return new KeybindComponent(keybind);
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof KeybindComponent that)) return false;
+        return keybind.equals(that.keybind)
+
+                // base component
+                && getSiblings().equals(that.getSiblings())
+                && getTextFormat().equals(that.getTextFormat())
+                && Objects.equals(getInsertion(), that.getInsertion())
+                && Objects.equals(getClickEvent(), that.getClickEvent())
+                && Objects.equals(getHoverEvent(), that.getHoverEvent());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = keybind.hashCode();
+
+        // base component
+        result = 31 * result + getSiblings().hashCode();
+        result = 31 * result + getTextFormat().hashCode();
+        result = 31 * result + Objects.hashCode(getInsertion());
+        result = 31 * result + Objects.hashCode(getClickEvent());
+        result = 31 * result + Objects.hashCode(getHoverEvent());
+
+        return result;
     }
 
     public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, KeybindComponent> {

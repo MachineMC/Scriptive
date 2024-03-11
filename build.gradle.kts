@@ -4,14 +4,10 @@ plugins {
 }
 
 group = "org.machinemc"
-version = "1.1"
+version = "1.2"
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("http://www.machinemc.org/releases")
-        isAllowInsecureProtocol = true
-    }
 }
 
 dependencies {
@@ -21,29 +17,44 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withSourcesJar()
+}
+
 publishing {
     repositories {
         maven {
             name = "machine"
-            url = uri("http://www.machinemc.org/releases")
+            url = uri("https://repo.machinemc.org/releases")
             credentials(PasswordCredentials::class)
             authentication {
                 create<BasicAuthentication>("basic")
             }
-            isAllowInsecureProtocol = true
         }
     }
     publications {
         create<MavenPublication>("maven") {
             groupId = "org.machinemc"
             artifactId = "scriptive"
-            version = "1.1"
+            version = project.version.toString()
             from(components["java"])
         }
     }
 }
 
 tasks {
+    compileJava {
+        options.release.set(21)
+        options.encoding = Charsets.UTF_8.name()
+    }
+    javadoc {
+        options.encoding = Charsets.UTF_8.name()
+    }
+    processResources {
+        filteringCharset = Charsets.UTF_8.name()
+    }
     test {
         useJUnitPlatform()
     }

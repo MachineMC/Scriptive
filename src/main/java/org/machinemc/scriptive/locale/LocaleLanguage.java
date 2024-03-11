@@ -25,9 +25,9 @@ public abstract class LocaleLanguage {
 
     public abstract boolean has(String node);
 
-    public static LocaleLanguage load(ClassLoader classLoader, String path) {
+    public static LocaleLanguage load(InputStream is) {
         Map<String, String> translations = new HashMap<>();
-        parseTranslations(translations::put, classLoader, path);
+        loadFromJSON(is, translations::put);
         return new LocaleLanguage() {
 
             @Override
@@ -43,15 +43,15 @@ public abstract class LocaleLanguage {
         };
     }
 
-    private static void parseTranslations(BiConsumer<String, String> consumer, ClassLoader classLoader, String path) {
+    public static LocaleLanguage load(ClassLoader classLoader, String path) {
         try (InputStream stream = classLoader.getResourceAsStream(path)) {
-            loadFromJSON(stream, consumer);
+            return load(stream);
         } catch (IOException | JsonParseException e) {
             throw new RuntimeException("Couldn't read strings from " + path, e);
         }
     }
 
-    public static void loadFromJSON(InputStream stream, BiConsumer<String, String> consumer) {
+    private static void loadFromJSON(InputStream stream, BiConsumer<String, String> consumer) {
         JsonObject json = GsonInstance.get().fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), JsonObject.class);
         json.entrySet().forEach(entry -> {
             String value = Optional.ofNullable(json.get(entry.getKey()))
