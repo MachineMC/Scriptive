@@ -19,7 +19,7 @@ public class TranslationComponent extends BaseComponent {
     private @Nullable String fallback;
     private Component[] arguments;
 
-    private List<Component> decomposedParts;
+    private transient List<Component> decomposedParts;
 
     protected TranslationComponent(@Nullable LocaleLanguage localeLanguage, String translation, @Nullable String fallback, Component... arguments) {
         super();
@@ -67,7 +67,7 @@ public class TranslationComponent extends BaseComponent {
     public List<Component> toFlatList() {
         decompose();
         List<Component> separated = super.toFlatList();
-        separated.remove(0);
+        separated.removeFirst();
         separated.addAll(0, decomposedParts);
         return separated;
     }
@@ -235,7 +235,6 @@ public class TranslationComponent extends BaseComponent {
                 && translation.equals(that.translation)
                 && Objects.equals(fallback, that.fallback)
                 && Arrays.equals(arguments, that.arguments)
-                && Objects.equals(decomposedParts, that.decomposedParts)
 
                 // base component
                 && getSiblings().equals(that.getSiblings())
@@ -251,7 +250,6 @@ public class TranslationComponent extends BaseComponent {
         result = 31 * result + translation.hashCode();
         result = 31 * result + Objects.hashCode(fallback);
         result = 31 * result + Arrays.hashCode(arguments);
-        result = 31 * result + Objects.hashCode(decomposedParts);
 
         // base component
         result = 31 * result + getSiblings().hashCode();
