@@ -3,6 +3,11 @@ plugins {
     `maven-publish`
 }
 
+dependencies {
+    implementation(project(":scriptive-core"))
+    implementation(libs.google.gson)
+}
+
 publishing {
     repositories {
         maven {
@@ -17,7 +22,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "org.machinemc"
-            artifactId = "scriptive-core"
+            artifactId = "scriptive-gson"
             version = project.version.toString()
             from(components["java"])
         }

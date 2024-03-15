@@ -2,6 +2,7 @@ rootProject.name = "Scriptive"
 
 include("scriptive-core")
 include("scriptive-formatify")
+include("scriptive-gson")
 
 pluginManagement {
     includeBuild("build-logic")

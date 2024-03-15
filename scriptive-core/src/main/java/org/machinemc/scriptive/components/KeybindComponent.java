@@ -5,11 +5,11 @@ import org.machinemc.scriptive.style.TextFormat;
 import java.util.Map;
 import java.util.Objects;
 
-public class KeybindComponent extends BaseComponent {
+public final class KeybindComponent extends BaseComponent implements VanillaComponent {
 
     private String keybind;
 
-    protected KeybindComponent(String keybind) {
+    private KeybindComponent(String keybind) {
         super();
         this.keybind = keybind;
     }
@@ -68,12 +68,17 @@ public class KeybindComponent extends BaseComponent {
         return clone;
     }
 
+    @Override
+    public Class<KeybindComponent> getType() {
+        return KeybindComponent.class;
+    }
+
     public static KeybindComponent of(String keybind) {
         return new KeybindComponent(keybind);
     }
 
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof KeybindComponent that)) return false;
         return keybind.equals(that.keybind)
@@ -100,9 +105,9 @@ public class KeybindComponent extends BaseComponent {
         return result;
     }
 
-    public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, KeybindComponent> {
+    public static final class ComponentModifier extends Component.ComponentModifier<ComponentModifier, KeybindComponent> {
 
-        protected ComponentModifier(KeybindComponent component) {
+        private ComponentModifier(KeybindComponent component) {
             super(component);
         }
 

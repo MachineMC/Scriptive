@@ -1,16 +1,7 @@
 package org.machinemc.scriptive.locale;
 
-import com.google.gson.*;
-import org.machinemc.scriptive.GsonInstance;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public abstract class LocaleLanguage {
@@ -25,9 +16,9 @@ public abstract class LocaleLanguage {
 
     public abstract boolean has(String node);
 
-    public static LocaleLanguage load(InputStream is) {
-        Map<String, String> translations = new HashMap<>();
-        loadFromJSON(is, translations::put);
+    public static LocaleLanguage fromMap(Map<String, String> map) {
+        Map<String, String> translations = new ConcurrentHashMap<>();
+        map.forEach((key, translation) -> translations.put(key, UNSUPPORTED_FORMAT_PATTERN.matcher(translation).replaceAll("%$1s")));
         return new LocaleLanguage() {
 
             @Override
@@ -41,27 +32,6 @@ public abstract class LocaleLanguage {
             }
 
         };
-    }
-
-    public static LocaleLanguage load(ClassLoader classLoader, String path) {
-        try (InputStream stream = classLoader.getResourceAsStream(path)) {
-            return load(stream);
-        } catch (IOException | JsonParseException e) {
-            throw new RuntimeException("Couldn't read strings from " + path, e);
-        }
-    }
-
-    private static void loadFromJSON(InputStream stream, BiConsumer<String, String> consumer) {
-        JsonObject json = GsonInstance.get().fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), JsonObject.class);
-        json.entrySet().forEach(entry -> {
-            String value = Optional.ofNullable(json.get(entry.getKey()))
-                    .filter(JsonElement::isJsonPrimitive)
-                    .map(JsonElement::getAsJsonPrimitive)
-                    .map(JsonPrimitive::getAsString)
-                    .orElseThrow(() -> new JsonSyntaxException("Expected " + entry.getKey() + " to be a string"));
-            String translation = UNSUPPORTED_FORMAT_PATTERN.matcher(value).replaceAll("%$1s");
-            consumer.accept(entry.getKey(), translation);
-        });
     }
 
 }

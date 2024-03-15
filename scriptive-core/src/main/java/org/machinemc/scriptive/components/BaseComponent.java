@@ -12,7 +12,16 @@ import org.machinemc.scriptive.style.TextFormat;
 import java.util.*;
 import java.util.function.Consumer;
 
-public abstract class BaseComponent implements Component {
+/**
+ * Shared component implementation.
+ * <p>
+ * Can be extended to create custom component implementations.
+ *
+ * @see TextComponent
+ * @see TranslationComponent
+ * @see KeybindComponent
+ */
+public abstract non-sealed class BaseComponent implements Component {
 
     private final List<Component> siblings;
     private TextFormat textFormat;
@@ -39,58 +48,72 @@ public abstract class BaseComponent implements Component {
         this.textFormat = Objects.requireNonNull(textFormat, "textFormat");
     }
 
+    @Override
     public Optional<Colour> getColor() {
         return textFormat.getColor();
     }
 
+    @Override
     public void setColor(@Nullable Colour color) {
         textFormat.setColor(color);
     }
 
+    @Override
     public Optional<Boolean> isBold() {
         return textFormat.getStyle(ChatStyle.BOLD);
     }
 
+    @Override
     public void setBold(@Nullable Boolean bold) {
         textFormat.setStyle(ChatStyle.BOLD, bold);
     }
 
+    @Override
     public Optional<Boolean> isObfuscated() {
         return textFormat.getStyle(ChatStyle.OBFUSCATED);
     }
 
+    @Override
     public void setObfuscated(@Nullable Boolean obfuscated) {
         textFormat.setStyle(ChatStyle.OBFUSCATED, obfuscated);
     }
 
+    @Override
     public Optional<Boolean> isItalic() {
         return textFormat.getStyle(ChatStyle.ITALIC);
     }
 
+    @Override
     public void setItalic(@Nullable Boolean italic) {
         textFormat.setStyle(ChatStyle.ITALIC, italic);
     }
 
+    @Override
     public Optional<Boolean> isUnderlined() {
         return textFormat.getStyle(ChatStyle.UNDERLINED);
     }
 
+    @Override
     public void setUnderlined(@Nullable Boolean underlined) {
         textFormat.setStyle(ChatStyle.UNDERLINED, underlined);
     }
 
+    @Override
     public Optional<Boolean> isStrikethrough() {
         return textFormat.getStyle(ChatStyle.STRIKETHROUGH);
     }
 
+    @Override
     public void setStrikethrough(@Nullable Boolean strikethrough) {
         textFormat.setStyle(ChatStyle.STRIKETHROUGH, strikethrough);
     }
 
+    @Override
     public Optional<String> getFont() {
         return textFormat.getFont();
     }
 
+    @Override
     public void setFont(@Nullable String font) {
         textFormat.setFont(font);
     }

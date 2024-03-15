@@ -5,11 +5,11 @@ import org.machinemc.scriptive.style.TextFormat;
 import java.util.Map;
 import java.util.Objects;
 
-public class TextComponent extends BaseComponent {
+public final class TextComponent extends BaseComponent implements VanillaComponent {
 
     private String text;
 
-    protected TextComponent(String text) {
+    private TextComponent(String text) {
         super();
         this.text = text;
     }
@@ -68,6 +68,11 @@ public class TextComponent extends BaseComponent {
         return clone;
     }
 
+    @Override
+    public Class<TextComponent> getType() {
+        return TextComponent.class;
+    }
+
     public static TextComponent of(String text) {
         return new TextComponent(text);
     }
@@ -83,7 +88,7 @@ public class TextComponent extends BaseComponent {
     }
 
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TextComponent that)) return false;
         return text.equals(that.text)
@@ -110,9 +115,9 @@ public class TextComponent extends BaseComponent {
         return result;
     }
 
-    public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, TextComponent> {
+    public static final class ComponentModifier extends Component.ComponentModifier<ComponentModifier, TextComponent> {
 
-        protected ComponentModifier(TextComponent component) {
+        private ComponentModifier(TextComponent component) {
             super(component);
         }
 

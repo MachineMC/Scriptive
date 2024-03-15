@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TranslationComponent extends BaseComponent {
+public final class TranslationComponent extends BaseComponent implements VanillaComponent {
 
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 
@@ -21,7 +21,7 @@ public class TranslationComponent extends BaseComponent {
 
     private transient List<Component> decomposedParts;
 
-    protected TranslationComponent(@Nullable LocaleLanguage localeLanguage, String translation, @Nullable String fallback, Component... arguments) {
+    private TranslationComponent(@Nullable LocaleLanguage localeLanguage, String translation, @Nullable String fallback, Component... arguments) {
         super();
         this.localeLanguage = localeLanguage;
         this.translation = translation;
@@ -210,6 +210,11 @@ public class TranslationComponent extends BaseComponent {
         return clone;
     }
 
+    @Override
+    public Class<TranslationComponent> getType() {
+        return TranslationComponent.class;
+    }
+
     public static TranslationComponent of(String translation, Component... arguments) {
         return of(null, translation, null, arguments);
     }
@@ -228,7 +233,7 @@ public class TranslationComponent extends BaseComponent {
     }
 
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TranslationComponent that)) return false;
         return Objects.equals(localeLanguage, that.localeLanguage)
@@ -261,9 +266,9 @@ public class TranslationComponent extends BaseComponent {
         return result;
     }
 
-    public static class ComponentModifier extends Component.ComponentModifier<ComponentModifier, TranslationComponent> {
+    public static final class ComponentModifier extends Component.ComponentModifier<ComponentModifier, TranslationComponent> {
 
-        protected ComponentModifier(TranslationComponent component) {
+        private ComponentModifier(TranslationComponent component) {
             super(component);
         }
 
