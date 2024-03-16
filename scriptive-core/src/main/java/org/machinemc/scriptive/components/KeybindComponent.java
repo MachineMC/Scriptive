@@ -116,11 +116,6 @@ public final class KeybindComponent extends BaseComponent implements VanillaComp
             return getThis();
         }
 
-        @Override
-        protected ComponentModifier getThis() {
-            return this;
-        }
-
     }
 
 }

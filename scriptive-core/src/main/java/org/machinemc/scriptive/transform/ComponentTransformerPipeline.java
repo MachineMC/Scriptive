@@ -8,15 +8,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+// TODO transform all siblings in #transform method
 public class ComponentTransformerPipeline {
 
     private final Map<Class<? extends Component>, ComponentTransformer<?, ?>> transformers = new ConcurrentHashMap<>();
 
     public void register(ComponentTransformer<?, ?> transformer) {
         if (transformers.containsKey(transformer.getInputType()))
-            throw new UnsupportedOperationException(
-                    "Transformer for '" + transformer.getInputType().getName() + "' components is already registered"
-            );
+            throw new IllegalArgumentException("Transformer for '" + transformer.getInputType().getName() + "' components is already registered");
         transformers.put(transformer.getInputType(), transformer);
     }
 

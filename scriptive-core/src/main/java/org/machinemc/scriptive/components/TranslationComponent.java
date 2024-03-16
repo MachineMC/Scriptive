@@ -287,11 +287,6 @@ public final class TranslationComponent extends BaseComponent implements Vanilla
             return getThis();
         }
 
-        @Override
-        protected ComponentModifier getThis() {
-            return this;
-        }
-
     }
 
 }

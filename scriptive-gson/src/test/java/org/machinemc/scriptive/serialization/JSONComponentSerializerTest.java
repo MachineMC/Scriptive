@@ -9,7 +9,7 @@ import org.machinemc.scriptive.style.ChatColor;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class JsonComponentSerializerTest {
+public class JSONComponentSerializerTest {
 
     @Test
     public void test() {
@@ -20,7 +20,7 @@ public class JsonComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        JsonComponentSerializer serializer = JsonComponentSerializer.get();
+        JSONComponentSerializer serializer = JSONComponentSerializer.get();
         assert serializer.deserialize(serializer.serialize(component)).equals(component);
     }
 
@@ -33,7 +33,7 @@ public class JsonComponentSerializerTest {
             json = new String(is.readAllBytes());
         }
 
-        JsonComponentSerializer serializer = JsonComponentSerializer.get();
+        JSONComponentSerializer serializer = JSONComponentSerializer.get();
         TextComponent component = (TextComponent) serializer.deserialize(json);
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();

@@ -104,9 +104,9 @@ public class TextFormat implements Contents {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = new HashMap<>();
-        map.put("color", color);
-        map.put("font", font);
-        styleMap.forEach((chatStyle, flag) -> {
+        getColor().ifPresent(colour -> map.put("color", colour.getName()));
+        getFont().ifPresent(font -> map.put("font", font));
+        getStyles().forEach((chatStyle, flag) -> {
             if (flag != null)
                 map.put(chatStyle.getName(), flag);
         });

@@ -107,11 +107,10 @@ public class MapComponentSerializer implements ComponentSerializer<Map<String, O
                 properties -> component.setHoverEvent(HoverEvent.deserialize(properties))
         );
 
-        if (input.containsKey("extra")) {
-            component.clearSiblings();
-            for (Map<String, Object> extra : ((List<Map<String, Object>>) input.get("extra"))) {
-                component.append(deserialize(extra));
-            }
+        List<Map<String, Object>> extra = (List<Map<String, Object>>) input.get("extra");
+        if (extra != null) {
+            for (Map<String, Object> child : extra)
+                component.append(deserialize(child));
         }
 
         return component;

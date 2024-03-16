@@ -126,11 +126,6 @@ public final class TextComponent extends BaseComponent implements VanillaCompone
             return getThis();
         }
 
-        @Override
-        protected ComponentModifier getThis() {
-            return this;
-        }
-
     }
 
 }

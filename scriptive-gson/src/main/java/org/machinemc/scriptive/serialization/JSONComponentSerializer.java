@@ -8,25 +8,25 @@ import org.machinemc.scriptive.components.VanillaComponent;
 
 import java.util.Map;
 
-public class JsonComponentSerializer implements ComponentSerializer<String> {
+public class JSONComponentSerializer implements ComponentSerializer<String> {
 
-    private static final JsonComponentSerializer INSTANCE = new JsonComponentSerializer();
+    private static final JSONComponentSerializer INSTANCE = new JSONComponentSerializer();
 
     private final Gson gson = new Gson();
 
-    public static JsonComponentSerializer get() {
+    public static JSONComponentSerializer get() {
         return INSTANCE;
     }
 
-    private JsonComponentSerializer() {
+    private JSONComponentSerializer() {
     }
 
     @Override
     public VanillaComponent deserialize(String input) {
-        return deserializeJson(JsonParser.parseString(input));
+        return deserializeJSON(JsonParser.parseString(input));
     }
 
-    private VanillaComponent deserializeJson(JsonElement json) {
+    private VanillaComponent deserializeJSON(JsonElement json) {
         Map<String, Object> map = gson.fromJson(json, new TypeToken<Map<String, Object>>() {}.getType());
         return MapComponentSerializer.get().deserialize(map);
     }

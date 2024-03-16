@@ -3,6 +3,7 @@ rootProject.name = "Scriptive"
 include("scriptive-core")
 include("scriptive-formatify")
 include("scriptive-gson")
+include("scriptive-nbt")
 
 pluginManagement {
     includeBuild("build-logic")
@@ -22,6 +23,9 @@ dependencyResolutionManagement {
 
             val googleGson: String by settings
             library("google-gson", "com.google.code.gson:gson:$googleGson")
+
+            val machineNbt: String by settings
+            library("machinemc-nbt", "org.machinemc:nbt-core:$machineNbt")
         }
 
     }

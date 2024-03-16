@@ -214,12 +214,7 @@ public sealed interface Component
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     default ComponentModifier modify() {
-        return new ComponentModifier(this) {
-            @Override
-            protected ComponentModifier getThis() {
-                return this;
-            }
-        };
+        return new ComponentModifier(this);
     }
 
     /**
@@ -268,7 +263,7 @@ public sealed interface Component
      * @param <M> modifier
      * @param <C> component
      */
-    abstract class ComponentModifier<M extends ComponentModifier<M, C>, C extends Component> {
+    class ComponentModifier<M extends ComponentModifier<M, C>, C extends Component> {
 
         protected final C component;
         private final C original;
@@ -324,6 +319,11 @@ public sealed interface Component
             return getThis();
         }
 
+        public M font(@Nullable String font) {
+            component.setFont(font);
+            return getThis();
+        }
+
         public M append(String literal) {
             component.append(literal);
             return getThis();
@@ -334,7 +334,10 @@ public sealed interface Component
             return getThis();
         }
 
-        protected abstract M getThis();
+        @SuppressWarnings("unchecked")
+        protected M getThis() {
+            return (M) this;
+        }
 
         public C finish() {
             original.merge(component);

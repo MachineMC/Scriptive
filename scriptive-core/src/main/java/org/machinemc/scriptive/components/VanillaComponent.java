@@ -6,4 +6,7 @@ package org.machinemc.scriptive.components;
 public sealed interface VanillaComponent
         extends Component
         permits KeybindComponent, TextComponent, TranslationComponent {
+
+    VanillaComponent clone();
+
 }
