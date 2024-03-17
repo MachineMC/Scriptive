@@ -9,7 +9,7 @@ import org.machinemc.scriptive.style.ChatColor;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class JSONComponentSerializerTest {
+public class NBTComponentSerializerTest {
 
     @Test
     public void test() {
@@ -20,7 +20,8 @@ public class JSONComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        JSONComponentSerializer serializer = JSONComponentSerializer.get();
+        NBTComponentSerializer serializer = NBTComponentSerializer.get();
+
         assert serializer.deserialize(serializer.serialize(component)).equals(component);
     }
 
@@ -35,6 +36,9 @@ public class JSONComponentSerializerTest {
 
         JSONComponentSerializer serializer = JSONComponentSerializer.get();
         TextComponent component = (TextComponent) serializer.deserialize(json);
+
+        NBTComponentSerializer nbtSerializer = NBTComponentSerializer.get();
+        component = (TextComponent) nbtSerializer.deserialize(nbtSerializer.serialize(component));
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();
         HoverEvent.Text content = hoverEvent.contents();

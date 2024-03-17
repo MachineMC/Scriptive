@@ -1,15 +1,13 @@
 package org.machinemc.scriptive.events;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 import org.machinemc.scriptive.Contents;
 import org.machinemc.scriptive.components.Component;
-import org.machinemc.scriptive.components.TextComponent;
-import org.machinemc.scriptive.serialization.MapComponentSerializer;
+import org.machinemc.scriptive.serialization.ObjectComponentSerializer;
 
 import java.util.*;
 
-public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V contents) implements Contents {
+public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V contents) implements Contents {
 
     public HoverEvent(Action<V> action, ValueHolder<V> valueHolder) {
         this(action, valueHolder.asHoverEventValue());
@@ -27,18 +25,18 @@ public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V cont
     public Map<String, Object> asMap() {
         return Map.of(
                 "action", action.name(),
-                "contents", contents.getContents()
+                "contents", contents.asMap()
         );
     }
 
     @SuppressWarnings("unchecked")
-    public static <V extends Value<?>> HoverEvent<?> deserialize(Map<String, Object> map) {
+    public static <V extends Value> HoverEvent<?> deserialize(Map<String, Object> map) {
         HoverEvent.Action<V> action = (Action<V>) Action.byName(map.get("action") + "");
         if (action == null) return null;
         return new HoverEvent<>(action, action.parseValue(map.get("contents")));
     }
 
-    public static final class Action<V extends Value<?>> {
+    public static final class Action<V extends Value> {
 
         public static final Action<Text> SHOW_TEXT = new Action<>("show_text", Text.class);
         public static final Action<Item> SHOW_ITEM = new Action<>("show_item", Item.class);
@@ -64,24 +62,8 @@ public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V cont
         public V parseValue(Object value) {
             if (value == null || (this != SHOW_TEXT && !(value instanceof Map<?, ?>))) return null;
 
-            if (this == SHOW_TEXT) {
-                return (V) switch (value) {
-                    case String string -> new Text(TextComponent.of(string));
-                    case Map<?, ?> map -> new Text(MapComponentSerializer.get().deserialize((Map<String, Object>) map));
-                    case List<?> list -> {
-                        List<Component> components = new ArrayList<>();
-                        for (Object o : list) {
-                            if (o instanceof String s) {
-                                components.add(TextComponent.of(s));
-                                continue;
-                            }
-                            components.add(MapComponentSerializer.get().deserialize((Map<String, Object>) o));
-                        }
-                        yield new Text(components);
-                    }
-                    default -> null;
-                };
-            }
+            if (this == SHOW_TEXT)
+                return (V) new Text(ObjectComponentSerializer.get().deserialize(value));
 
             else if (this == SHOW_ITEM) {
                 Map<String, Object> map = (Map<String, Object>) value;
@@ -114,7 +96,7 @@ public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V cont
         }
 
         @SuppressWarnings("unchecked")
-        public static <V extends Value<?>> Action<V> ofValue(V value) {
+        public static <V extends Value> Action<V> ofValue(V value) {
             return (Action<V>) switch (value) {
                 case Text text -> SHOW_TEXT;
                 case Item item -> SHOW_ITEM;
@@ -150,7 +132,7 @@ public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V cont
 
     }
 
-    public interface ValueHolder<V extends Value<?>> {
+    public interface ValueHolder<V extends Value> {
 
         V asHoverEventValue();
 
@@ -161,39 +143,23 @@ public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V cont
 
     }
 
-    public sealed interface Value<T> permits Text, Item, Entity {
-
-        T getContents();
+    public sealed interface Value extends Contents permits Text, Item, Entity {
 
     }
 
-    public record Text(@Unmodifiable List<Component> components) implements Value<List<Map<String, Object>>> {
-
-        public Text(Collection<Component> components) {
-            this(new ArrayList<>(components));
-        }
-
-        public Text(Component component) {
-            this(Collections.singletonList(component));
-        }
-
-        public Text {
-            components = Collections.unmodifiableList(components);
-        }
+    public record Text(Component component) implements Value {
 
         @Override
-        public @Unmodifiable List<Map<String, Object>> getContents() {
-            List<Map<String, Object>> list = new ArrayList<>();
-            components.forEach(component -> list.add(component.asMap()));
-            return Collections.unmodifiableList(list);
+        public Map<String, Object> asMap() {
+            return component.asMap();
         }
 
     }
 
-    public record Item(String id, int count, @Nullable String tag) implements Value<Map<String, Object>> {
+    public record Item(String id, int count, @Nullable String tag) implements Value {
 
         @Override
-        public Map<String, Object> getContents() {
+        public Map<String, Object> asMap() {
             Map<String, Object> map = new HashMap<>();
             map.put("id", id());
             map.put("count", count());
@@ -203,10 +169,10 @@ public record HoverEvent<V extends HoverEvent.Value<?>>(Action<V> action, V cont
 
     }
 
-    public record Entity(UUID id, @Nullable String type, @Nullable String name) implements Value<Map<String, Object>> {
+    public record Entity(UUID id, @Nullable String type, @Nullable String name) implements Value {
 
         @Override
-        public Map<String, Object> getContents() {
+        public Map<String, Object> asMap() {
             Map<String, Object> map = new HashMap<>();
             map.put("id", id());
             if (type() != null) map.put("type", type());

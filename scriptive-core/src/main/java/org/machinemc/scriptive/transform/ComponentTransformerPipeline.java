@@ -1,7 +1,7 @@
 package org.machinemc.scriptive.transform;
 
 import org.machinemc.scriptive.components.Component;
-import org.machinemc.scriptive.components.VanillaComponent;
+import org.machinemc.scriptive.components.ClientComponent;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -31,13 +31,13 @@ public class ComponentTransformerPipeline {
         return transformers.containsKey(inputType);
     }
 
-    public VanillaComponent transform(Component component) {
+    public ClientComponent transform(Component component) {
         return transform(component, new HashSet<>());
     }
 
     @SuppressWarnings("unchecked")
-    private VanillaComponent transform(Component component, Set<ComponentTransformer<?, ?>> used) {
-        if (component instanceof VanillaComponent) return (VanillaComponent) component;
+    private ClientComponent transform(Component component, Set<ComponentTransformer<?, ?>> used) {
+        if (component instanceof ClientComponent) return (ClientComponent) component;
         ComponentTransformer<Component, Component> next = (ComponentTransformer<Component, Component>) transformers.get(component.getType());
         if (next == null)
             throw new NullPointerException("Missing transformer for '" + component.getType().getName() + "' component");

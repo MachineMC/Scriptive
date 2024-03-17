@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  * @see TranslationComponent
  * @see KeybindComponent
  */
-public abstract non-sealed class BaseComponent implements Component {
+public abstract class BaseComponent implements Component {
 
     private final List<Component> siblings;
     private TextFormat textFormat;
@@ -242,7 +242,7 @@ public abstract non-sealed class BaseComponent implements Component {
         getClickEvent().ifPresent(clickEvent -> map.put("clickEvent", clickEvent.asMap()));
         getHoverEvent().ifPresent(hoverEvent -> map.put("hoverEvent", hoverEvent.asMap()));
         if (hasSiblings())
-            map.put("extra", getSiblings().stream().map(Contents::asMap).toArray(Map[]::new));
+            map.put("extra", getSiblings().stream().map(Contents::asMap).toList());
         return map;
     }
 

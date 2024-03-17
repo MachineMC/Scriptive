@@ -15,18 +15,18 @@ public class MapComponentSerializer implements ComponentSerializer<Map<String, O
 
     private static final MapComponentSerializer INSTANCE = new MapComponentSerializer();
 
-    private final Map<String, Class<? extends VanillaComponent>> componentKeysMap = new HashMap<>();
-    private final Map<Class<? extends VanillaComponent>, ComponentCreator<?>> componentCreators = new LinkedHashMap<>();
+    private final Map<String, Class<? extends ClientComponent>> componentKeysMap = new HashMap<>();
+    private final Map<Class<? extends ClientComponent>, ComponentCreator<?>> componentCreators = new LinkedHashMap<>();
 
     {
         register(KeybindComponent.class, properties -> KeybindComponent.of((String) properties.get("keybind")), "keybind");
         register(TextComponent.class, properties -> TextComponent.of((String) properties.get("text")), "text");
         register(TranslationComponent.class, properties -> {
             String translate = (String) properties.get("translate");
-            List<Map<String, Object>> argumentsMap = (List<Map<String, Object>>) properties.getOrDefault("with", new ArrayList<>());
+            List<?> argumentsMap = (List<?>) properties.getOrDefault("with", new ArrayList<>());
             Component[] arguments = new Component[argumentsMap.size()];
             for (int i = 0; i < argumentsMap.size(); i++)
-                arguments[i] = deserialize(argumentsMap.get(i));
+                arguments[i] = ObjectComponentSerializer.get().deserialize(argumentsMap.get(i));
             return TranslationComponent.of(translate, arguments);
         }, "translate", "with");
     }
@@ -38,7 +38,7 @@ public class MapComponentSerializer implements ComponentSerializer<Map<String, O
     private MapComponentSerializer() {
     }
 
-    private <T extends VanillaComponent> void register(Class<T> type, ComponentCreator<T> creator, String... uniqueKeys) {
+    private <T extends ClientComponent> void register(Class<T> type, ComponentCreator<T> creator, String... uniqueKeys) {
         if (componentCreators.containsKey(type))
             throw new IllegalArgumentException("Type '" + type + "' is already registered");
         for (String key : uniqueKeys)
@@ -46,29 +46,29 @@ public class MapComponentSerializer implements ComponentSerializer<Map<String, O
         componentCreators.put(type, creator);
     }
 
-    private Class<? extends VanillaComponent> getComponentTypeFromProperties(Map<String, Object> properties) {
+    private Class<? extends ClientComponent> getComponentTypeFromProperties(Map<String, Object> properties) {
         for (String key : properties.keySet()) {
-            Class<? extends VanillaComponent> type = componentKeysMap.get(key);
+            Class<? extends ClientComponent> type = componentKeysMap.get(key);
             if (type != null) return type;
         }
         return null;
     }
 
-    private <T extends VanillaComponent> ComponentCreator<T> getCreator(Class<T> type) {
+    private <T extends ClientComponent> ComponentCreator<T> getCreator(Class<T> type) {
         ComponentCreator<T> creator = (ComponentCreator<T>) componentCreators.get(type);
         if (creator == null)
             throw new IllegalArgumentException("Type '" + type + "' does not have a registered ComponentCreator");
         return creator;
     }
 
-    private <T extends VanillaComponent> T newInstance(Map<String, Object> properties) {
+    private <T extends ClientComponent> T newInstance(Map<String, Object> properties) {
         Class<T> type = (Class<T>) getComponentTypeFromProperties(properties);
         if (type == null)
             throw new IllegalArgumentException("Don't know how to turn " + properties + " into a component");
         return newInstance(type, properties);
     }
 
-    private <T extends VanillaComponent> T newInstance(Class<T> type, Map<String, Object> properties) {
+    private <T extends ClientComponent> T newInstance(Class<T> type, Map<String, Object> properties) {
         return getCreator(type).create(properties);
     }
 
@@ -80,8 +80,8 @@ public class MapComponentSerializer implements ComponentSerializer<Map<String, O
     }
 
     @Override
-    public VanillaComponent deserialize(Map<String, Object> input) {
-        VanillaComponent component = newInstance(input);
+    public ClientComponent deserialize(Map<String, Object> input) {
+        ClientComponent component = newInstance(input);
 
         Optional.ofNullable(input.get("color"))
                 .map(String::valueOf)
@@ -110,14 +110,14 @@ public class MapComponentSerializer implements ComponentSerializer<Map<String, O
         List<Map<String, Object>> extra = (List<Map<String, Object>>) input.get("extra");
         if (extra != null) {
             for (Map<String, Object> child : extra)
-                component.append(deserialize(child));
+                component.append(ObjectComponentSerializer.get().deserialize(child));
         }
 
         return component;
     }
 
     @Override
-    public Map<String, Object> serialize(VanillaComponent component) {
+    public Map<String, Object> serialize(ClientComponent component) {
         return component.asMap();
     }
 

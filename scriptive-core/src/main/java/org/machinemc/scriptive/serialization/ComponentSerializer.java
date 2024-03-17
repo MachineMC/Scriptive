@@ -1,11 +1,11 @@
 package org.machinemc.scriptive.serialization;
 
-import org.machinemc.scriptive.components.VanillaComponent;
+import org.machinemc.scriptive.components.ClientComponent;
 
 public interface ComponentSerializer<R> {
 
-    VanillaComponent deserialize(R input);
+    ClientComponent deserialize(R input);
 
-    R serialize(VanillaComponent component);
+    R serialize(ClientComponent component);
 
 }

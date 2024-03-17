@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class TranslationComponent extends BaseComponent implements VanillaComponent {
+public final class TranslationComponent extends BaseComponent implements ClientComponent {
 
     private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
 

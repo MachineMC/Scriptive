@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 /**
- * A Component is an immutable object that represents how text
+ * A Component is an object that represents how text
  * is displayed Minecraft clients. It is used in many specific contexts expecting formatted text,
  * including chat messages, written books, death messages, window titles, and the like.
  * <p>
@@ -19,9 +19,7 @@ import java.util.*;
  * <p> translatable - {@link TranslationComponent}
  * <p> keybind - {@link KeybindComponent}
  */
-public sealed interface Component
-        extends Contents, Cloneable, HoverEvent.ValueHolder<HoverEvent.Text>
-        permits BaseComponent, VanillaComponent {
+public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<HoverEvent.Text> {
 
     /**
      * @return text format of the component

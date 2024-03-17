@@ -5,7 +5,7 @@ import org.machinemc.scriptive.style.TextFormat;
 import java.util.Map;
 import java.util.Objects;
 
-public final class KeybindComponent extends BaseComponent implements VanillaComponent {
+public final class KeybindComponent extends BaseComponent implements ClientComponent {
 
     private String keybind;
 
