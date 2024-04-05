@@ -20,7 +20,7 @@ public class NBTComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        NBTComponentSerializer serializer = NBTComponentSerializer.get();
+        NBTComponentSerializer serializer = new NBTComponentSerializer();
 
         assert serializer.deserialize(serializer.serialize(component)).equals(component);
     }
@@ -34,10 +34,10 @@ public class NBTComponentSerializerTest {
             json = new String(is.readAllBytes());
         }
 
-        JSONComponentSerializer serializer = JSONComponentSerializer.get();
+        JSONComponentSerializer serializer = new JSONComponentSerializer();
         TextComponent component = (TextComponent) serializer.deserialize(json);
 
-        NBTComponentSerializer nbtSerializer = NBTComponentSerializer.get();
+        NBTComponentSerializer nbtSerializer = new NBTComponentSerializer();
         component = (TextComponent) nbtSerializer.deserialize(nbtSerializer.serialize(component));
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();

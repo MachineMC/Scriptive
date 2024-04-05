@@ -1,7 +1,9 @@
 package org.machinemc.scriptive.components;
 
 import org.jetbrains.annotations.Contract;
-import org.machinemc.scriptive.Contents;
+import org.machinemc.scriptive.serialization.ComponentProperties;
+import org.machinemc.scriptive.serialization.ComponentSerializer;
+import org.machinemc.scriptive.serialization.Contents;
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
 import org.machinemc.scriptive.style.*;
@@ -20,6 +22,23 @@ import java.util.*;
  * <p> keybind - {@link KeybindComponent}
  */
 public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<HoverEvent.Text> {
+
+    /**
+     * Returns name identifier of the component, this can be used
+     * to speed up deserialization.
+     *
+     * @return name of the component
+     */
+    @Nullable String getName();
+
+    /**
+     * Returns list of unique keys of properties for this component,
+     * this is used for deserialization of components that
+     * do not supply component type.
+     *
+     * @return unique keys for the component
+     */
+    List<String> getUniqueKeys();
 
     /**
      * @return text format of the component
@@ -240,12 +259,20 @@ public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<H
 
     /**
      * Returns type of the component.
-     * <p>
-     * Is used to match component transformers.
      *
      * @return type of this component
      */
-    Class<? extends BaseComponent> getType();
+    Class<? extends Component> getType();
+
+    /**
+     * Loads properties of this component from component properties.
+     * <p>
+     * Overrides all properties of the component based on given properties.
+     *
+     * @param properties properties to load to this component
+     * @param serializer serializer
+     */
+    void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer);
 
     @Override
     default HoverEvent.Text asHoverEventValue() {

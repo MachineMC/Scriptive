@@ -1,9 +1,31 @@
 package org.machinemc.scriptive.style;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.awt.Color;
 import java.util.Locale;
 
-public interface Colour extends TerminalFormat {
+/**
+ * Represents a colour applicable to {@link org.machinemc.scriptive.components.Component}.
+ */
+public sealed interface Colour extends TerminalFormat permits ChatColor, HexColor {
+
+    /**
+     * Returns color from its name.
+     * <p>
+     * Applies to both named color constants and hex colors.
+     * <p>
+     * Returns null in case the color name is invalid.
+     *
+     * @param name name of the color
+     * @return color
+     */
+    static @Nullable Colour fromName(String name) {
+        if (name == null) return null;
+        Colour named = ChatColor.byName(name).orElse(null);
+        if (named != null) return named;
+        return HexColor.of(name).orElse(null);
+    }
 
     /**
      * Returns whether the color is a {@link ChatColor} or another implementation

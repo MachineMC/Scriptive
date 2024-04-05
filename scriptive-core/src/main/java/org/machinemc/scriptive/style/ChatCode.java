@@ -4,7 +4,11 @@ import org.jetbrains.annotations.Range;
 
 import java.util.Optional;
 
-public interface ChatCode extends TerminalFormat {
+/**
+ * Represents a chat format that can be represented as a
+ * code.
+ */
+public sealed interface ChatCode extends TerminalFormat permits ChatColor, ChatStyle {
 
     /**
      * @return character code of the chat code
@@ -36,6 +40,7 @@ public interface ChatCode extends TerminalFormat {
     /**
      * Returns the chat code for the given character, null
      * if there is no chat code assigned to the character.
+     *
      * @param code character to get the chat code for
      * @return chat code mapped to given character
      */
@@ -46,6 +51,7 @@ public interface ChatCode extends TerminalFormat {
     /**
      * Returns the chat code for the given character, null
      * if there is no chat code assigned to the character.
+     *
      * @param code character to get the chat code for
      * @return chat code mapped to given character
      */
@@ -57,6 +63,7 @@ public interface ChatCode extends TerminalFormat {
 
     /**
      * Returns the chat code by its numeric code.
+     *
      * @param code numeric code of the chat code
      * @return chat code with given numeric code
      */

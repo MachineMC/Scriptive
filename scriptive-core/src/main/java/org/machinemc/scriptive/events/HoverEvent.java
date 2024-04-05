@@ -1,16 +1,89 @@
 package org.machinemc.scriptive.events;
 
 import org.jetbrains.annotations.Nullable;
-import org.machinemc.scriptive.Contents;
+import org.jetbrains.annotations.UnmodifiableView;
+import org.machinemc.scriptive.serialization.ComponentProperties;
+import org.machinemc.scriptive.serialization.ComponentProperty;
+import org.machinemc.scriptive.serialization.ComponentSerializer;
+import org.machinemc.scriptive.serialization.Contents;
 import org.machinemc.scriptive.components.Component;
-import org.machinemc.scriptive.serialization.ObjectComponentSerializer;
 
 import java.util.*;
 
+/**
+ * Represents an event that happens when client hovers over a component.
+ *
+ * @param action action
+ * @param contents content of the action
+ */
 public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V contents) implements Contents {
+
+    /**
+     * Hover event that shows text on hover.
+     */
+    public static final Action<Text> SHOW_TEXT = new Action<>("show_text", Text.class);
+
+    /**
+     * Hover event that shows an item on hover.
+     */
+    public static final Action<Item> SHOW_ITEM = new Action<>("show_item", Item.class);
+
+    /**
+     * Hover event that show information about an entity on hover.
+     */
+    public static final Action<Entity> SHOW_ENTITY = new Action<>("show_entity", Entity.class);
+
+    public HoverEvent {
+        Objects.requireNonNull(action, "Action can not be null");
+        Objects.requireNonNull(contents, "Contents can not be null");
+    }
 
     public HoverEvent(Action<V> action, ValueHolder<V> valueHolder) {
         this(action, valueHolder.asHoverEventValue());
+    }
+
+    /**
+     * Creates hover event from component properties.
+     *
+     * @param properties component properties
+     * @param serializer serializer to use for deserialization of text hover events
+     * @return hover event
+     * @param <V> hover event value type
+     */
+    @SuppressWarnings("unchecked")
+    public static <V extends HoverEvent.Value> Optional<HoverEvent<V>> fromProperties(ComponentProperties properties,
+                                                                                      ComponentSerializer<?> serializer) {
+        if (!properties.contains("action")) return Optional.empty();
+        Action<V> action = (Action<V>) Action.byName(properties.getValueOr("action", null));
+        if (action == null) return Optional.empty();
+
+        if (action == SHOW_TEXT) {
+            ComponentProperty<?> property = properties.getOr("contents", null);
+            if (property == null) return Optional.empty();
+            return Optional.of(new HoverEvent<>(action, (V) new Text(ComponentProperty.convertToProperties(property).value(), serializer)));
+        }
+
+        if (action == SHOW_ITEM) {
+            ComponentProperties contents = properties.getValueOr("contents", null);
+            if (contents == null) return Optional.empty();
+            return Optional.of(new HoverEvent<>(action, (V) new Item(contents)));
+        }
+
+        if (action == SHOW_ENTITY) {
+            ComponentProperties contents = properties.getValueOr("contents", null);
+            if (contents == null) return Optional.empty();
+            return Optional.of(new HoverEvent<>(action, (V) new Entity(contents)));
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public @UnmodifiableView ComponentProperties getProperties() {
+        ComponentProperties properties = new ComponentProperties();
+        properties.set("action", action.name());
+        properties.set("contents", contents.getProperties());
+        return properties.unmodifiableView();
     }
 
     public HoverEvent<V> withValue(V value) {
@@ -21,73 +94,44 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
         return new HoverEvent<>(action, valueHolder);
     }
 
-    @Override
-    public Map<String, Object> asMap() {
-        return Map.of(
-                "action", action.name(),
-                "contents", contents.asMap()
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <V extends Value> HoverEvent<?> deserialize(Map<String, Object> map) {
-        HoverEvent.Action<V> action = (Action<V>) Action.byName(map.get("action") + "");
-        if (action == null) return null;
-        return new HoverEvent<>(action, action.parseValue(map.get("contents")));
-    }
-
+    /**
+     * Different actions that may happen when client
+     * hovers over the component.
+     *
+     * @param <V> value type
+     */
     public static final class Action<V extends Value> {
-
-        public static final Action<Text> SHOW_TEXT = new Action<>("show_text", Text.class);
-        public static final Action<Item> SHOW_ITEM = new Action<>("show_item", Item.class);
-        public static final Action<Entity> SHOW_ENTITY = new Action<>("show_entity", Entity.class);
 
         private final String name;
         private final Class<V> type;
 
         private Action(String name, Class<V> type) {
-            this.name = name;
-            this.type = type;
+            this.name = Objects.requireNonNull(name, "Name can not be null");
+            this.type = Objects.requireNonNull(type, "Type can not be null");
         }
 
+        /**
+         * @return name of the action
+         */
         public String name() {
             return name;
         }
 
+        /**
+         * @return value type of the action
+         */
         public Class<V> type() {
             return type;
         }
 
-        @SuppressWarnings("unchecked")
-        public V parseValue(Object value) {
-            if (value == null || (this != SHOW_TEXT && !(value instanceof Map<?, ?>))) return null;
-
-            if (this == SHOW_TEXT)
-                return (V) new Text(ObjectComponentSerializer.get().deserialize(value));
-
-            else if (this == SHOW_ITEM) {
-                Map<String, Object> map = (Map<String, Object>) value;
-                if (!map.containsKey("id") || !map.containsKey("count")) return null;
-                String id = map.get("id") + "";
-                int count = Integer.parseInt(map.get("count") + "");
-                String tag = map.containsKey("tag") ? map.get("tag") + "" : null;
-                return (V) new Item(id, count, tag);
-            }
-
-            else if (this == SHOW_ENTITY) {
-                Map<String, Object> map = (Map<String, Object>) value;
-                UUID id = map.containsKey("id") ? UUID.fromString(map.get("id") + "") : null;
-                if (id == null) return null;
-                String type = map.containsKey("type") ? map.get("type") + "" : null;
-                String name = map.containsKey("name") ? map.get("name") + "" : null;
-                return (V) new Entity(id, type, name);
-            }
-
-            throw new UnsupportedOperationException();
-        }
-
-        public static Action<?> byName(String name) {
-            return switch (name) {
+        /**
+         * Returns action by its name.
+         *
+         * @param name name of the action
+         * @return action
+         */
+        public static @Nullable Action<?> byName(String name) {
+            return switch (name.toLowerCase()) {
                 case "show_text" -> SHOW_TEXT;
                 case "show_item" -> SHOW_ITEM;
                 case "show_entity" -> SHOW_ENTITY;
@@ -95,6 +139,13 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
             };
         }
 
+        /**
+         * Returns action for given value.
+         *
+         * @param value value
+         * @return action for given value
+         * @param <V> value type
+         */
         @SuppressWarnings("unchecked")
         public static <V extends Value> Action<V> ofValue(V value) {
             return (Action<V>) switch (value) {
@@ -104,6 +155,9 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
             };
         }
 
+        /**
+         * @return all possible action values
+         */
         public static Action<?>[] values() {
             return new Action[]{SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY};
         }
@@ -132,10 +186,22 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
 
     }
 
+    /**
+     * Object that, as itself, can be represented as a value for
+     * hover event.
+     *
+     * @param <V> value type
+     */
     public interface ValueHolder<V extends Value> {
 
+        /**
+         * @return hover value representing this object
+         */
         V asHoverEventValue();
 
+        /**
+         * @return hover event representing this object
+         */
         default HoverEvent<V> asHoverEvent() {
             V value = asHoverEventValue();
             return new HoverEvent<>(Action.ofValue(value), value);
@@ -143,41 +209,96 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
 
     }
 
+    /**
+     * Represents a value for a hover event.
+     */
     public sealed interface Value extends Contents permits Text, Item, Entity {
-
     }
 
+    /**
+     * Text hover value.
+     *
+     * @param component component
+     */
     public record Text(Component component) implements Value {
 
+        public Text {
+            Objects.requireNonNull(component, "Component can not be null");
+        }
+
+        @SuppressWarnings("unchecked")
+        public Text(ComponentProperties properties, ComponentSerializer<?> serializer) {
+            this(((ComponentSerializer<Object>) serializer).deserialize(serializer.serializeFromProperties(properties)));
+        }
+
         @Override
-        public Map<String, Object> asMap() {
-            return component.asMap();
+        public @UnmodifiableView ComponentProperties getProperties() {
+            return component.getProperties().unmodifiableView();
         }
 
     }
 
+    /**
+     * Item hover value.
+     *
+     * @param id namespaced key of the item
+     * @param count count of the item
+     * @param tag NBT of this item in the SNBT format
+     */
     public record Item(String id, int count, @Nullable String tag) implements Value {
 
+        public Item {
+            Objects.requireNonNull(id, "Item ID can not be null");
+        }
+
+        public Item(ComponentProperties properties) {
+            this(
+                    properties.getValue("id", String.class).orElseThrow(),
+                    properties.getValue("count", Integer.class).orElseThrow(),
+                    properties.getValue("tag", String.class).orElse(null)
+            );
+        }
+
         @Override
-        public Map<String, Object> asMap() {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", id());
-            map.put("count", count());
-            if (tag() != null) map.put("tag", tag);
-            return map;
+        public @UnmodifiableView ComponentProperties getProperties() {
+            ComponentProperties properties = new ComponentProperties();
+            properties.set("id", id);
+            properties.set("count", count);
+            properties.set("tag", tag);
+            return properties.unmodifiableView();
         }
 
     }
 
+    /**
+     * Entity hover value.
+     *
+     * @param id UUID of the entity
+     * @param type namespaced key of type of the entity, defaults to {@code minecraft:pig} on the client
+     *             if this value is not specified
+     * @param name custom name of the entity
+     */
     public record Entity(UUID id, @Nullable String type, @Nullable String name) implements Value {
 
+        public Entity {
+            Objects.requireNonNull(id, "Entity UUID can not be null");
+        }
+
+        public Entity(ComponentProperties properties) {
+            this(
+                    UUID.fromString(properties.getValue("id", String.class).orElseThrow()),
+                    properties.getValue("type", String.class).orElse(null),
+                    properties.getValue("name", String.class).orElse(null)
+            );
+        }
+
         @Override
-        public Map<String, Object> asMap() {
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", id());
-            if (type() != null) map.put("type", type());
-            if (name() != null) map.put("name", name());
-            return map;
+        public @UnmodifiableView ComponentProperties getProperties() {
+            ComponentProperties properties = new ComponentProperties();
+            properties.set("id", id.toString());
+            properties.set("type", type);
+            properties.set("name", name);
+            return properties.unmodifiableView();
         }
 
     }

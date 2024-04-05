@@ -5,14 +5,22 @@ import org.machinemc.scriptive.exceptions.MalformedHexCodeException;
 import java.awt.Color;
 import java.util.Optional;
 
-public class HexColor implements Colour {
+/**
+ * Represents a color that supports full range of hexadecimal colors.
+ *
+ * @param rgb rgb value
+ */
+public record HexColor(int rgb) implements Colour {
 
-    private final int rgb;
-
-    public HexColor(int rgb) {
-        this.rgb = rgb & 0x00FFFFFF;
+    public HexColor {
+        rgb = rgb & 0x00FFFFFF;
     }
 
+    /**
+     * @param r red value
+     * @param g green value
+     * @param b blue value
+     */
     public HexColor(int r, int g, int b) {
         this(((r & 0xFF) << 16) |
                 ((g & 0xFF) << 8) |
@@ -53,6 +61,13 @@ public class HexColor implements Colour {
         }
     }
 
+    /**
+     * Checks whether the provided string is a valid hex
+     * color format.
+     *
+     * @param hex string to check
+     * @return whether the provided string is a valid hex color format
+     */
     public static boolean isValidHex(String hex) {
         int start = hex.startsWith("#") ? 1 : 0;
         if (hex.length() - start != 6)
@@ -64,6 +79,13 @@ public class HexColor implements Colour {
         return true;
     }
 
+    /**
+     * Returns hex color from its string representation or
+     * empty optional in case the format is invalid.
+     *
+     * @param hex hex
+     * @return color
+     */
     public static Optional<HexColor> of(String hex) {
         if (!isValidHex(hex))
             return Optional.empty();

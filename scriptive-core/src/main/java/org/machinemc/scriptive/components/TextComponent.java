@@ -1,25 +1,78 @@
 package org.machinemc.scriptive.components;
 
+import org.jetbrains.annotations.UnmodifiableView;
+import org.machinemc.scriptive.serialization.ComponentProperties;
+import org.machinemc.scriptive.serialization.ComponentSerializer;
 import org.machinemc.scriptive.style.TextFormat;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
+/**
+ * A component that displays a string.
+ */
 public final class TextComponent extends BaseComponent implements ClientComponent {
+
+    /**
+     * Creates new text component.
+     *
+     * @param text string to display
+     * @return text component
+     */
+    public static TextComponent of(String text) {
+        return new TextComponent(text);
+    }
+
+    /**
+     * Creates new text component.
+     *
+     * @param text string to display
+     * @param textFormat text format for the component
+     * @return text component
+     */
+    public static TextComponent of(String text, TextFormat textFormat) {
+        TextComponent component = new TextComponent(text);
+        component.setTextFormat(textFormat);
+        return component;
+    }
+
+    /**
+     * Creates new empty text component.
+     *
+     * @return empty text component
+     */
+    public static TextComponent empty() {
+        return of("");
+    }
 
     private String text;
 
     private TextComponent(String text) {
-        super();
-        this.text = text;
+        this.text = Objects.requireNonNull(text, "Text can not be null");
     }
 
+    /**
+     * @return text
+     */
     public String getText() {
         return text;
     }
 
+    /**
+     * @param text new text
+     */
     public void setText(String text) {
         this.text = text;
+    }
+
+    @Override
+    public String getName() {
+        return "text";
+    }
+
+    @Override
+    public List<String> getUniqueKeys() {
+        return List.of("text");
     }
 
     @Override
@@ -55,13 +108,6 @@ public final class TextComponent extends BaseComponent implements ClientComponen
     }
 
     @Override
-    public Map<String, Object> asMap() {
-        Map<String, Object> map = super.asMap();
-        map.put("text", text);
-        return map;
-    }
-
-    @Override
     public TextComponent clone() {
         TextComponent clone = new TextComponent(text);
         clone.merge(this);
@@ -73,18 +119,17 @@ public final class TextComponent extends BaseComponent implements ClientComponen
         return TextComponent.class;
     }
 
-    public static TextComponent of(String text) {
-        return new TextComponent(text);
+    @Override
+    public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
+        super.loadProperties(properties, serializer);
+        text = properties.getValue("text", String.class).orElseThrow();
     }
 
-    public static TextComponent of(String text, TextFormat textFormat) {
-        TextComponent component = new TextComponent(text);
-        component.setTextFormat(textFormat);
-        return component;
-    }
-
-    public static TextComponent empty() {
-        return of("");
+    @Override
+    public @UnmodifiableView ComponentProperties getProperties() {
+        ComponentProperties properties = super.getProperties();
+        properties.set("text", text);
+        return properties.unmodifiableView();
     }
 
     @Override

@@ -20,7 +20,7 @@ public class JSONComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        JSONComponentSerializer serializer = JSONComponentSerializer.get();
+        JSONComponentSerializer serializer = new JSONComponentSerializer();
         assert serializer.deserialize(serializer.serialize(component)).equals(component);
     }
 
@@ -33,7 +33,7 @@ public class JSONComponentSerializerTest {
             json = new String(is.readAllBytes());
         }
 
-        JSONComponentSerializer serializer = JSONComponentSerializer.get();
+        JSONComponentSerializer serializer = new JSONComponentSerializer();
         TextComponent component = (TextComponent) serializer.deserialize(json);
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();

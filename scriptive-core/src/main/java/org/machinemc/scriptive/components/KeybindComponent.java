@@ -1,25 +1,56 @@
 package org.machinemc.scriptive.components;
 
+import org.jetbrains.annotations.UnmodifiableView;
+import org.machinemc.scriptive.serialization.ComponentProperties;
+import org.machinemc.scriptive.serialization.ComponentSerializer;
 import org.machinemc.scriptive.style.TextFormat;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
+/**
+ * A component that displays the current keybind for an action.
+ */
 public final class KeybindComponent extends BaseComponent implements ClientComponent {
+
+    /**
+     * Creates new keybind component.
+     *
+     * @param keybind keybind
+     * @return keybind component
+     */
+    public static KeybindComponent of(String keybind) {
+        return new KeybindComponent(keybind);
+    }
 
     private String keybind;
 
     private KeybindComponent(String keybind) {
-        super();
-        this.keybind = keybind;
+        this.keybind = Objects.requireNonNull(keybind, "Keybind can not be null");
     }
 
+    /**
+     * @return keybind
+     */
     public String getKeybind() {
         return keybind;
     }
 
+    /**
+     * @param keybind new keybind
+     */
     public void setKeybind(String keybind) {
         this.keybind = keybind;
+    }
+
+    @Override
+    public String getName() {
+        return "translatable";
+    }
+
+    @Override
+    public List<String> getUniqueKeys() {
+        return List.of("translate", "with");
     }
 
     @Override
@@ -55,13 +86,6 @@ public final class KeybindComponent extends BaseComponent implements ClientCompo
     }
 
     @Override
-    public Map<String, Object> asMap() {
-        Map<String, Object> map = super.asMap();
-        map.put("keybind", keybind);
-        return map;
-    }
-
-    @Override
     public KeybindComponent clone() {
         KeybindComponent clone = new KeybindComponent(keybind);
         clone.merge(this);
@@ -73,8 +97,17 @@ public final class KeybindComponent extends BaseComponent implements ClientCompo
         return KeybindComponent.class;
     }
 
-    public static KeybindComponent of(String keybind) {
-        return new KeybindComponent(keybind);
+    @Override
+    public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
+        super.loadProperties(properties, serializer);
+        keybind = properties.getValue("keybind", String.class).orElseThrow();
+    }
+
+    @Override
+    public @UnmodifiableView ComponentProperties getProperties() {
+        ComponentProperties properties = super.getProperties();
+        properties.set("keybind", keybind);
+        return properties.unmodifiableView();
     }
 
     @Override

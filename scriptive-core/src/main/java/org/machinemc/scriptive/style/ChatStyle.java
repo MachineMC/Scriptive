@@ -4,12 +4,34 @@ import org.jetbrains.annotations.Range;
 
 import java.util.Optional;
 
+/**
+ * Represents style which may be applied to a {@link org.machinemc.scriptive.components.Component}.
+ */
 public enum ChatStyle implements ChatCode {
 
+    /**
+     * A decoration which makes text obfuscated/unreadable.
+     */
     OBFUSCATED("obfuscated", 'k', "5"),
+
+    /**
+     * A decoration which makes text appear bold.
+     */
     BOLD("bold", 'l', "1"),
+
+    /**
+     * A decoration which makes text have a strike through it.
+     */
     STRIKETHROUGH("strikethrough", 'm', "9"),
+
+    /**
+     * A decoration which makes text have an underline.
+     */
     UNDERLINED("underlined", 'n', "4"),
+
+    /**
+     * A decoration which makes text appear in italics.
+     */
     ITALIC("italic", 'o', "3");
 
     private final String name;
@@ -22,6 +44,9 @@ public enum ChatStyle implements ChatCode {
         this.consoleCode = consoleCode;
     }
 
+    /**
+     * @return name of the chat style
+     */
     public String getName() {
         return name;
     }
@@ -64,6 +89,7 @@ public enum ChatStyle implements ChatCode {
     /**
      * Returns the chat style for the given character, null
      * if there is no chat style assigned to the character.
+     *
      * @param code character to get the chat style for
      * @return chat style mapped to given character
      */
@@ -78,6 +104,7 @@ public enum ChatStyle implements ChatCode {
     /**
      * Returns the chat style for the given character, null
      * if there is no chat style assigned to the character.
+     *
      * @param code character to get the chat style for
      * @return chat style mapped to given character
      */
@@ -89,6 +116,7 @@ public enum ChatStyle implements ChatCode {
 
     /**
      * Returns the chat style by its numeric code.
+     *
      * @param code numeric code of the chat style
      * @return chat style with given numeric code
      */

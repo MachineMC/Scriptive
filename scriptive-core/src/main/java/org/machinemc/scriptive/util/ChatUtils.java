@@ -7,6 +7,7 @@ import org.machinemc.scriptive.style.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,8 +21,6 @@ public final class ChatUtils {
     private static final Pattern AMP_COLOR_CODE_PATTERN = Pattern.compile("(?i)&([\\dabcdefklmnor])");
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("(?i)" + COLOR_CHAR + "([\\dabcdefklmnor])");
 
-    public static final String DEFAULT_CHAT_FORMAT = "<%name%> %message%";
-
     private ChatUtils() {
         throw new UnsupportedOperationException();
     }
@@ -32,6 +31,7 @@ public final class ChatUtils {
      * @return string with translated color codes
      */
     public static String colored(String string) {
+        Objects.requireNonNull(string, "String can not be null");
         return AMP_COLOR_CODE_PATTERN.matcher(string).replaceAll(COLOR_CHAR + "$1");
     }
 
@@ -41,6 +41,7 @@ public final class ChatUtils {
      * @return chat component from given string
      */
     public static TextComponent stringToComponent(String string) {
+        Objects.requireNonNull(string, "String can not be null");
         Matcher matcher = COLOR_CODE_PATTERN.matcher(string);
         if (!matcher.find())
             return TextComponent.of(string);
@@ -95,6 +96,7 @@ public final class ChatUtils {
      * @return serialized component
      */
     public static String componentToString(Component component) {
+        System.out.println("Component can not be null");
         return component.toLegacyString();
     }
 
@@ -105,6 +107,7 @@ public final class ChatUtils {
      * @return formatted string for console
      */
     public static String consoleFormatted(String string) {
+        Objects.requireNonNull(string, "String can not be null");
         return COLOR_CODE_PATTERN.matcher(colored(string)).replaceAll(matchResult -> ChatCode.byChar(matchResult.group(1))
                 .map(ChatCode::getConsoleFormat)
                 .orElse(matchResult.group()));
@@ -116,6 +119,7 @@ public final class ChatUtils {
      * @return formatted component as string for console
      */
     public static String consoleFormatted(Component component) {
+        Objects.requireNonNull(component, "Component can not be null");
         final StringBuilder builder = new StringBuilder();
         final List<Component> components = new LinkedList<>(component.toFlatList());
 
