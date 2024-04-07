@@ -45,12 +45,12 @@ public final class KeybindComponent extends BaseComponent implements ClientCompo
 
     @Override
     public String getName() {
-        return "translatable";
+        return "keybind";
     }
 
     @Override
     public List<String> getUniqueKeys() {
-        return List.of("translate", "with");
+        return List.of("keybind");
     }
 
     @Override

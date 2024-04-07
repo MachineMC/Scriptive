@@ -102,11 +102,11 @@ public final class TranslationComponent extends BaseComponent implements ClientC
     }
 
     /**
-     * Updates locale language used to compute flat string representation of
-     * this component.
+     * Returns new copy of this translation component with new locale language used
+     * to compute flat string representation of the component.
      *
      * @param localeLanguage new locale language
-     * @return this
+     * @return copy of this component
      */
     @Contract("_ -> new")
     public TranslationComponent withLocaleLanguage(LocaleLanguage localeLanguage) {

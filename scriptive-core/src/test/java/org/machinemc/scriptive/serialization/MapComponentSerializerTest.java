@@ -22,8 +22,6 @@ public class MapComponentSerializerTest {
         MapComponentSerializer serializer = new MapComponentSerializer();
         Map<String, ?> map = serializer.serialize(component);
 
-        System.out.println(map);
-
         Component deserialized = serializer.deserialize(map);
 
         assert component.equals(deserialized);

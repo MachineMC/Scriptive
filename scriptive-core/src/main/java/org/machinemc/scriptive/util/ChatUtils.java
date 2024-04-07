@@ -96,7 +96,7 @@ public final class ChatUtils {
      * @return serialized component
      */
     public static String componentToString(Component component) {
-        System.out.println("Component can not be null");
+        Objects.requireNonNull(component, "Component can not be null");
         return component.toLegacyString();
     }
 
