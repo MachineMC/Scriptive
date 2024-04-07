@@ -1,5 +1,6 @@
 package org.machinemc.scriptive.serialization;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -67,19 +68,16 @@ public sealed class ComponentProperties {
      * has different type.
      *
      * @param key key of the property
-     * @param or the default property value
+     * @param or the default property value. Cannot be null
      * @return property
      * @param <T> property type
      */
+    @Contract("_, null -> fail")
     @SuppressWarnings("unchecked")
     public <T extends ComponentProperty<?>> T getOr(String key, T or) {
-        try {
-            ComponentProperty<?> property = propertyMap.get(key);
-            if (property == null) return or;
-            return (T) property;
-        } catch (ClassCastException exception) {
-            return or;
-        }
+        ComponentProperty<?> property = propertyMap.get(key);
+        if (!or.getClass().isInstance(property)) return or;
+        return (T) property;
     }
 
     /**
@@ -92,15 +90,14 @@ public sealed class ComponentProperties {
      * @return property
      * @param <T> property value type
      */
+    @Contract("_, null -> fail")
     @SuppressWarnings("unchecked")
     public <T> T getValueOr(String key, T or) {
-        try {
-            ComponentProperty<?> property = propertyMap.get(key);
-            if (property == null) return or;
-            return (T) propertyMap.get(key).value();
-        } catch (ClassCastException exception) {
-            return or;
-        }
+        ComponentProperty<?> property = propertyMap.get(key);
+        if (property == null) return or;
+        Object value = property.value();
+        if (!or.getClass().isInstance(value)) return or;
+        return (T) value;
     }
 
     /**
