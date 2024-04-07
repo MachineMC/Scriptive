@@ -126,6 +126,8 @@ public final class TranslationComponent extends BaseComponent implements ClientC
      * @param translation new translation key
      */
     public void setTranslation(String translation) {
+        if (this.translation.equals(translation)) return;
+        decomposedParts = null;
         this.translation = translation;
     }
 
@@ -140,6 +142,8 @@ public final class TranslationComponent extends BaseComponent implements ClientC
      * @param fallback new fallback key
      */
     public void setFallback(@Nullable String fallback) {
+        if (Objects.equals(this.fallback, fallback)) return;
+        decomposedParts = null;
         this.fallback = fallback;
     }
 
@@ -154,6 +158,8 @@ public final class TranslationComponent extends BaseComponent implements ClientC
      * @param arguments new arguments
      */
     public void setArguments(Component @Nullable ... arguments) {
+        if (Arrays.equals(this.arguments, arguments)) return;
+        decomposedParts = null;
         if (arguments == null) arguments = new Component[0];
         for (Component argument : arguments) Objects.requireNonNull(argument, "Argument can not be null");
         this.arguments = arguments;
