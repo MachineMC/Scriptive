@@ -1,9 +1,11 @@
 ![banner](.github/assets/scriptive.png)
 
-<h4 align="center">Java Implementation for Minecraft Java Edition Chat Component Format</h4>
+<p align="center">Java Implementation for Minecraft Java Edition Chat Component Format.</p>
 
-[![license](https://img.shields.io/github/license/machinemc/scriptive?style=for-the-badge&color=657185)](LICENCE)
-![release](https://img.shields.io/github/v/release/machinemc/scriptive?style=for-the-badge&color=edb228)
+<p align="center">
+    <img src="https://img.shields.io/github/license/machinemc/scriptive?style=for-the-badge&color=107185" alt="LICENSE">
+    <img src="https://img.shields.io/github/v/release/machinemc/scriptive?style=for-the-badge&color=edb228" alt="RELEASE">
+</p>
 
 ---
 
@@ -23,6 +25,7 @@ versions.
 - Supports new NBT serialization introduced in *1.20.3* version of Minecraft
 - Supports JSON serialization
 - Provides [custom format](scriptive-formatify) of components suitable for *user-input*
+- Supports terminal format
 
 ### Modules
 
