@@ -260,7 +260,7 @@ public abstract class BaseComponent implements Component {
     @SuppressWarnings("unchecked")
     public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
         textFormat = new TextFormat(properties);
-        setInsertion(properties.getValueOr("insertion", null));
+        setInsertion(properties.getValue("insertion", String.class).orElse(null));
         setClickEvent(properties.getValue("clickEvent", ComponentProperties.class)
                 .flatMap(ClickEvent::fromProperties)
                 .orElse(null));

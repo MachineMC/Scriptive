@@ -22,12 +22,14 @@ public class JSONComponentSerializer extends ComponentSerializer<String> {
 
     @Override
     public String serializeFromProperties(ComponentProperties properties) {
+        Objects.requireNonNull(properties, "Component properties can not be null");
         JsonElement element = unwrap(ComponentProperty.properties(properties));
         return gson.toJson(element);
     }
 
     @Override
     public ComponentProperties deserializeAsProperties(String value) {
+        Objects.requireNonNull(value, "JSON can not be null");
         JsonElement element = JsonParser.parseString(value);
         return ComponentProperty.convertToProperties(wrap(element)).value();
     }

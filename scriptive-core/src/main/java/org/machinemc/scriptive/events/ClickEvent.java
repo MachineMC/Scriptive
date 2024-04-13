@@ -68,7 +68,7 @@ public record ClickEvent(Action action, String value) implements Contents {
             return Optional.empty();
         }
 
-        String value = properties.getValueOr("value", null);
+        String value = properties.getValue("value", String.class).orElse(null);
         if (value == null) return Optional.empty();
         return Optional.of(new ClickEvent(action, value));
     }

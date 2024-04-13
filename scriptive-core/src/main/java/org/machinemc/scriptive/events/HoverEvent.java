@@ -54,23 +54,25 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
     public static <V extends HoverEvent.Value> Optional<HoverEvent<V>> fromProperties(ComponentProperties properties,
                                                                                       ComponentSerializer<?> serializer) {
         if (!properties.contains("action")) return Optional.empty();
-        Action<V> action = (Action<V>) Action.byName(properties.getValueOr("action", null));
+        String actionName = properties.getValue("action", String.class).orElse(null);
+        if (actionName == null) return Optional.empty();
+        Action<V> action = (Action<V>) Action.byName(actionName);
         if (action == null) return Optional.empty();
 
         if (action == SHOW_TEXT) {
-            ComponentProperty<?> property = properties.getOr("contents", null);
+            ComponentProperty<?> property = properties.get("contents", ComponentProperty.class).orElse(null);
             if (property == null) return Optional.empty();
             return Optional.of(new HoverEvent<>(action, (V) new Text(ComponentProperty.convertToProperties(property).value(), serializer)));
         }
 
         if (action == SHOW_ITEM) {
-            ComponentProperties contents = properties.getValueOr("contents", null);
+            ComponentProperties contents = properties.getValue("contents", ComponentProperties.class).orElse(null);
             if (contents == null) return Optional.empty();
             return Optional.of(new HoverEvent<>(action, (V) new Item(contents)));
         }
 
         if (action == SHOW_ENTITY) {
-            ComponentProperties contents = properties.getValueOr("contents", null);
+            ComponentProperties contents = properties.getValue("contents", ComponentProperties.class).orElse(null);
             if (contents == null) return Optional.empty();
             return Optional.of(new HoverEvent<>(action, (V) new Entity(contents)));
         }

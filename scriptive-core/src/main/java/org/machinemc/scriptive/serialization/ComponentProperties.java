@@ -101,6 +101,21 @@ public sealed class ComponentProperties {
     }
 
     /**
+     * Returns unwrapped component property of this map if the wrapped property
+     * matches the provided class, or empty in case there is no property with
+     * given key, or it is different property type.
+     *
+     * @param key key of the property
+     * @param propertyClass type of the property
+     * @return unwrapped property value
+     * @param <T> value type
+     * @param <P> property type
+     */
+    public <T, P extends ComponentProperty<T>> Optional<T> getAndUnwrap(String key, Class<P> propertyClass) {
+        return get(key, propertyClass).map(ComponentProperty::value);
+    }
+
+    /**
      * Changes value of this property map.
      *
      * @param key key

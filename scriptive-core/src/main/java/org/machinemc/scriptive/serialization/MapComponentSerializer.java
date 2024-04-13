@@ -8,41 +8,51 @@ import java.util.*;
 public class MapComponentSerializer extends ComponentSerializer<Map<String, ?>> {
 
     @Override
+    @SuppressWarnings("unchecked")
     public Map<String, ?> serializeFromProperties(ComponentProperties properties) {
         Objects.requireNonNull(properties, "Component properties can not be null");
-        Map<String, Object> map = new HashMap<>();
-        Set<String> keys = properties.getKeys();
-        for (String key : keys) map.put(key, unwrap(properties.get(key, ComponentProperty.class).orElseThrow()));
-        return map;
+        return (Map<String, ?>) unwrap(ComponentProperty.properties(properties));
     }
 
     @Override
     public ComponentProperties deserializeAsProperties(Map<String, ?> value) {
         Objects.requireNonNull(value, "Map can not be null");
-        ComponentProperties properties = new ComponentProperties();
-        value.forEach((k, v) -> properties.set(k, wrap(v)));
-        return properties;
+        return ComponentProperty.convertToProperties(wrap(value)).value();
     }
 
     private Object unwrap(ComponentProperty<?> property) {
         return switch (property) {
-            case ComponentProperty.Properties properties -> serializeFromProperties(properties.value());
-            case ComponentProperty.Array array -> Arrays.stream(array.value()).map(this::serializeFromProperties).toList();
+            case ComponentProperty.Properties properties -> {
+                Map<String, Object> map = new HashMap<>();
+                properties.value().forEach((k, p) -> map.put(k, unwrap(p)));
+                yield map;
+            }
+            case ComponentProperty.Array array -> {
+                List<Object> list = new ArrayList<>();
+                Arrays.stream(array.value())
+                        .map(ComponentProperty::properties)
+                        .map(this::unwrap)
+                        .forEach(list::add);
+                yield list;
+            }
             default -> property.value();
         };
     }
 
-    @SuppressWarnings("unchecked")
     private ComponentProperty<?> wrap(Object o) {
         return switch (o) {
-            case Map<?, ?> map -> ComponentProperty.properties(deserializeAsProperties((Map<String, ?>) map));
+            case Map<?, ?> map -> {
+                ComponentProperties properties = new ComponentProperties();
+                map.forEach((k, e) -> properties.set((String) k, wrap(e)));
+                yield ComponentProperty.properties(properties);
+            }
             case List<?> list -> {
-                ComponentProperties[] properties = new ComponentProperties[list.size()];
-                for (int i = 0; i < properties.length; i++) {
-                    ComponentProperty<?> next = wrap(list.get(i));
-                    properties[i] = ComponentProperty.convertToProperties(next).value();
-                }
-                yield ComponentProperty.array(properties);
+                ComponentProperties[] array = list.stream()
+                        .map(this::wrap)
+                        .map(ComponentProperty::convertToProperties)
+                        .map(ComponentProperty::value)
+                        .toArray(ComponentProperties[]::new);
+                yield ComponentProperty.array(array);
             }
             default -> ComponentProperty.of(o);
         };

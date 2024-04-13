@@ -4,6 +4,7 @@ import org.machinemc.nbt.*;
 import org.machinemc.scriptive.components.Component;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Serializer for NBT format.
@@ -17,11 +18,13 @@ public class NBTComponentSerializer extends ComponentSerializer<NBT<?>> {
 
     @Override
     public NBTCompound serializeFromProperties(ComponentProperties properties) {
+        Objects.requireNonNull(properties, "Component properties can not be null");
         return (NBTCompound) unwrap(ComponentProperty.properties(properties));
     }
 
     @Override
     public ComponentProperties deserializeAsProperties(NBT<?> value) {
+        Objects.requireNonNull(value, "NBT can not be null");
         return ComponentProperty.convertToProperties(wrap(value)).value();
     }
 
