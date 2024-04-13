@@ -1,0 +1,1 @@
+{"text":"Hello World!","hoverEvent":{"action":"show_text","contents":[{"text":"This is a hover event","italic":true,"font":"minecraft:default"},"This is another hover text"]}}
