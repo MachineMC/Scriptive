@@ -280,7 +280,7 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
      *             if this value is not specified
      * @param name custom name of the entity
      */
-    public record Entity(UUID id, @Nullable String type, @Nullable String name) implements Value {
+    public record Entity(UUID id, @Nullable String type, @Nullable ComponentProperties name) implements Value {
 
         public Entity {
             Objects.requireNonNull(id, "Entity UUID can not be null");
@@ -290,7 +290,7 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
             this(
                     UUID.fromString(properties.getValue("id", String.class).orElseThrow()),
                     properties.getValue("type", String.class).orElse(null),
-                    properties.getValue("name", String.class).orElse(null)
+                    properties.getValue("name", ComponentProperties.class).orElse(null)
             );
         }
 
