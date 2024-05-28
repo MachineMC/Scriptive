@@ -17,20 +17,7 @@ public interface TagResolver {
     Optional<Tag> resolve(String tagName, ArgumentQueue arguments) throws ParseException;
 
     static TagResolver defaults() {
-        return resolvers(
-            DefaultTags.BOLD,
-            DefaultTags.OBFUSCATED,
-            DefaultTags.ITALIC,
-            DefaultTags.UNDERLINED,
-            DefaultTags.STRIKETHROUGH,
-            DefaultTags.FONT,
-            DefaultTags.INSERTION,
-            DefaultTags.CLICK_EVENT,
-            DefaultTags.HOVER_EVENT,
-            DefaultTags.KEYBIND,
-            DefaultTags.TRANSLATION,
-            DefaultTags.COLOR
-        );
+        return DefaultTags.ALL;
     }
 
     static TagResolver resolver(String name, Tag tag, String... aliases) {

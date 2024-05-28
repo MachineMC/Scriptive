@@ -17,9 +17,9 @@ public record HexColor(int rgb) implements Colour {
     }
 
     /**
-     * @param r red value
-     * @param g green value
-     * @param b blue value
+     * @param r red value (0-255)
+     * @param g green value (0-255)
+     * @param b blue value (0-255)
      */
     public HexColor(int r, int g, int b) {
         this(((r & 0xFF) << 16) |

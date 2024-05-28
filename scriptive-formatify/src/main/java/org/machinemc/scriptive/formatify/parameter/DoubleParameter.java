@@ -7,14 +7,16 @@ public class DoubleParameter implements Parameter<Double> {
     private final double min, max;
 
     public DoubleParameter() {
-        this(Double.MIN_VALUE);
+        this(Double.NEGATIVE_INFINITY);
     }
 
     public DoubleParameter(double min) {
-        this(min, Double.MAX_VALUE);
+        this(min, Double.POSITIVE_INFINITY);
     }
 
     public DoubleParameter(double min, double max) {
+        if (max <= min)
+            throw new IllegalArgumentException("max must be greater than min");
         this.min = min;
         this.max = max;
     }

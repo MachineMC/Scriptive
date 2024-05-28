@@ -6,6 +6,7 @@ import org.machinemc.scriptive.formatify.exceptions.ParseException;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Function;
 
@@ -39,7 +40,7 @@ public class ArgumentQueue implements Iterable<String> {
     }
 
     public <T> T poll(Function<String, T> function) {
-        return function.apply(queue.poll());
+        return Optional.ofNullable(queue.poll()).map(function).orElse(null);
     }
 
     public <T> T pollOr(Function<String, T> function, String error) {
@@ -47,8 +48,11 @@ public class ArgumentQueue implements Iterable<String> {
     }
 
     public <T> T pollOrDefault(Function<String, T> function, T defaultValue) {
-        T value = function.apply(queue.poll());
-        return value != null ? value : defaultValue;
+        return Optional.ofNullable(queue.poll()).map(function).orElse(defaultValue);
+    }
+
+    public void clear() {
+        queue.clear();
     }
 
     public String peek() {

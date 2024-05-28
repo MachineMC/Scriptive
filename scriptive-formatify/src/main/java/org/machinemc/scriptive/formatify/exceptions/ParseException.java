@@ -17,4 +17,12 @@ public class ParseException extends NoStacktraceException {
         super(message, cause);
     }
 
+    public ParseException withMessage(String message, Object... arguments) {
+        return withMessage(String.format(message, arguments));
+    }
+
+    public ParseException withMessage(String message) {
+        return new ParseException(message, getCause());
+    }
+
 }

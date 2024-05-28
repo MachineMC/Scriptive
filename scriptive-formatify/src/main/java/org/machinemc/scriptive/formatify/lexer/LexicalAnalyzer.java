@@ -16,8 +16,8 @@ public class LexicalAnalyzer {
         this.string = string;
     }
 
-    public List<Token> tokenize() {
-        List<Token> tokens = new LinkedList<>();
+    public LinkedList<Token> tokenize() {
+        LinkedList<Token> tokens = new LinkedList<>();
         Token token = nextToken();
         while (token != null) {
             tokens.add(token);

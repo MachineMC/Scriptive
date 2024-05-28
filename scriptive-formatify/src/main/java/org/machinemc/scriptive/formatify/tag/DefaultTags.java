@@ -6,17 +6,30 @@ import org.machinemc.scriptive.components.TranslationComponent;
 import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
 import org.machinemc.scriptive.formatify.exceptions.ParseException;
-import org.machinemc.scriptive.formatify.parameter.ColorParameter;
-import org.machinemc.scriptive.formatify.parameter.EnumParameter;
-import org.machinemc.scriptive.formatify.parameter.IntegerParameter;
-import org.machinemc.scriptive.formatify.parameter.StringParameter;
+import org.machinemc.scriptive.formatify.parameter.*;
 import org.machinemc.scriptive.style.Colour;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 public interface DefaultTags {
+    
+    TagResolver COLOR = TagResolver.builder()
+            .names("color", "colour")
+            .parameter("color", ColorParameter.any())
+            .componentUpdater((component, arguments) -> component.setColor(arguments.get("color")))
+            .build();
+
+    TagResolver DYNAMIC_COLOR = (tagName, arguments) -> {
+        try {
+            Colour color = ColorParameter.any().parse(tagName);
+            return Optional.of(component -> component.setColor(color));
+        } catch (ParseException ignore) {
+            return Optional.empty();
+        }
+    };
 
     TagResolver BOLD = TagResolver.resolver(Set.of("bold", "b"), component -> component.setBold(true));
     TagResolver OBFUSCATED = TagResolver.resolver(
@@ -96,16 +109,55 @@ public interface DefaultTags {
         if (!tagName.equals("translation") && !tagName.equals("translate")) return Optional.empty();
         String key = arguments.pollOr("translation key is not specified");
         Component[] translationArguments = new Component[arguments.size()];
-        for (int i = 0; i < translationArguments.length; i++) {
+        for (int i = 0; i < translationArguments.length; i++)
             translationArguments[i] = arguments.poll(arguments.formatify()::parse);
-        }
         return Optional.of(component -> component.append(TranslationComponent.of(key, translationArguments)));
     };
 
-    TagResolver COLOR = (tagName, arguments) -> {
-        String colorName = tagName.equals("color") || tagName.equals("colour") ? arguments.poll() : tagName;
-        Colour color = ColorParameter.any().parse(colorName);
-        return Optional.of(component -> component.setColor(color));
+    TagResolver GRADIENT = (tagName, arguments) -> {
+        if (!tagName.equals("gradient")) return Optional.empty();
+        Colour[] colors = new Colour[arguments.size()];
+        double offset = 0;
+        for (int i = 0; i < colors.length; i++) {
+            String argument = arguments.poll();
+            try {
+                colors[i] = ColorParameter.any().parse(argument);
+                continue;
+            } catch (ParseException e) {
+                if (i != colors.length - 1) throw e;
+            }
+            try {
+                offset = new DoubleParameter().parse(argument);
+            } catch (ParseException e) {
+                throw new ParseException("'" + argument + "' is neither a color nor a number");
+            }
+            colors = Arrays.copyOf(colors, colors.length - 1);
+        }
+        if (colors.length < 2) throw new ParseException("A gradient must have 2 or more colors");
+        return Optional.of(new GradientTag(colors, offset));
     };
+    TagResolver RAINBOW = (tagName, arguments) -> {
+        if (!tagName.equals("rainbow")) return Optional.empty();
+        double offset = arguments.pollOrDefault(new DoubleParameter()::parse, 0d);
+        return Optional.of(new RainbowTag(offset));
+    };
+
+    TagResolver ALL = TagResolver.resolvers(
+            COLOR,
+            BOLD,
+            OBFUSCATED,
+            ITALIC,
+            UNDERLINED,
+            STRIKETHROUGH,
+            FONT,
+            INSERTION,
+            CLICK_EVENT,
+            HOVER_EVENT,
+            KEYBIND,
+            TRANSLATION,
+            GRADIENT,
+            RAINBOW,
+            DYNAMIC_COLOR
+    );
 
 }

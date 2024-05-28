@@ -57,16 +57,10 @@ public class Formatify {
         return new Formatify(tagResolver, errorHandler, true);
     }
 
-    public static void main(String[] args) {
-        TextComponent component = formatify().parse("<hover_event:show_text:<abc>hey there!><blue><u>hover over me");
-        System.out.println(ChatUtils.consoleFormatted(component));
-    }
-
     public static Formatify formatify() {
         return Formatify.builder()
             .tagResolver(TagResolver.defaults())
             .errorHandler(error -> System.err.println(error.getMessage()))
-            .strict()
             .build();
     }
 
