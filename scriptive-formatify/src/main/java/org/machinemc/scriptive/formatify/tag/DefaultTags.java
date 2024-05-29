@@ -7,6 +7,7 @@ import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
 import org.machinemc.scriptive.formatify.exceptions.ParseException;
 import org.machinemc.scriptive.formatify.parameter.*;
+import org.machinemc.scriptive.serialization.ComponentProperties;
 import org.machinemc.scriptive.style.Colour;
 
 import java.util.Arrays;
@@ -90,7 +91,7 @@ public interface DefaultTags {
         } else {
             UUID id = arguments.pollOr(UUID::fromString, "'id' is not specified");
             String type = arguments.poll();
-            String name = arguments.poll();
+            ComponentProperties name = arguments.poll(arguments.formatify()::parse).getProperties();
             //noinspection unchecked
             hoverEvent = new HoverEvent<>(
                 (HoverEvent.Action<HoverEvent.Entity>) action,
