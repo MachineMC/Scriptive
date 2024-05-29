@@ -9,21 +9,20 @@ import java.util.Objects;
 /**
  * Serializer for NBT format.
  */
-public class NBTComponentSerializer extends ComponentSerializer<NBT<?>> {
+public class NBTPropertiesSerializer implements PropertiesSerializer<NBTCompound> {
+
+    private static final NBTPropertiesSerializer INSTANCE = new NBTPropertiesSerializer();
+
+    private NBTPropertiesSerializer() {}
 
     @Override
-    public NBTCompound serialize(Component component) {
-        return (NBTCompound) super.serialize(component);
-    }
-
-    @Override
-    public NBTCompound serializeFromProperties(ComponentProperties properties) {
+    public NBTCompound serialize(ComponentProperties properties) {
         Objects.requireNonNull(properties, "Component properties can not be null");
         return (NBTCompound) unwrap(ComponentProperty.properties(properties));
     }
 
     @Override
-    public ComponentProperties deserializeAsProperties(NBT<?> value) {
+    public ComponentProperties deserialize(NBTCompound value) {
         Objects.requireNonNull(value, "NBT can not be null");
         return ComponentProperty.convertToProperties(wrap(value)).value();
     }
@@ -69,6 +68,10 @@ public class NBTComponentSerializer extends ComponentSerializer<NBT<?>> {
             case NBTInt integer -> ComponentProperty.integer(integer.revert());
             default -> throw new IllegalStateException("Unexpected value: " + nbt);
         };
+    }
+
+    public static NBTPropertiesSerializer get() {
+        return INSTANCE;
     }
 
 }

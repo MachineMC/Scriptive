@@ -46,13 +46,11 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
      * Creates hover event from component properties.
      *
      * @param properties component properties
-     * @param serializer serializer to use for deserialization of text hover events
      * @return hover event
      * @param <V> hover event value type
      */
     @SuppressWarnings("unchecked")
-    public static <V extends HoverEvent.Value> Optional<HoverEvent<V>> fromProperties(ComponentProperties properties,
-                                                                                      ComponentSerializer<?> serializer) {
+    public static <V extends HoverEvent.Value> Optional<HoverEvent<V>> fromProperties(ComponentProperties properties) {
         if (!properties.contains("action")) return Optional.empty();
         String actionName = properties.getValue("action", String.class).orElse(null);
         if (actionName == null) return Optional.empty();
@@ -62,7 +60,7 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
         if (action == SHOW_TEXT) {
             ComponentProperty<?> property = properties.get("contents", ComponentProperty.class).orElse(null);
             if (property == null) return Optional.empty();
-            return Optional.of(new HoverEvent<>(action, (V) new Text(ComponentProperty.convertToProperties(property).value(), serializer)));
+            return Optional.of(new HoverEvent<>(action, (V) new Text(ComponentProperty.convertToProperties(property).value())));
         }
 
         if (action == SHOW_ITEM) {
@@ -222,20 +220,23 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
      *
      * @param component component
      */
-    public record Text(Component component) implements Value {
+    public record Text(ComponentProperties component) implements Value {
 
         public Text {
             Objects.requireNonNull(component, "Component can not be null");
         }
 
-        @SuppressWarnings("unchecked")
-        public Text(ComponentProperties properties, ComponentSerializer<?> serializer) {
-            this(((ComponentSerializer<Object>) serializer).deserialize(serializer.serializeFromProperties(properties)));
+        public Text(Component component) {
+            this(component.getProperties());
+        }
+
+        public Component component(ComponentSerializer serializer) {
+            return serializer.deserialize(component);
         }
 
         @Override
         public @UnmodifiableView ComponentProperties getProperties() {
-            return component.getProperties().unmodifiableView();
+            return component.unmodifiableView();
         }
 
     }
@@ -292,6 +293,10 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
                     properties.getValue("type", String.class).orElse(null),
                     properties.getValue("name", ComponentProperties.class).orElse(null)
             );
+        }
+
+        public Component name(ComponentSerializer serializer) {
+            return serializer.deserialize(name);
         }
 
         @Override

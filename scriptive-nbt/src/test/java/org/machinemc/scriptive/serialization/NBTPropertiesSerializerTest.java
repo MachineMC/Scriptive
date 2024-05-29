@@ -1,6 +1,7 @@
 package org.machinemc.scriptive.serialization;
 
 import org.junit.jupiter.api.Test;
+import org.machinemc.nbt.NBTCompound;
 import org.machinemc.scriptive.components.TextComponent;
 import org.machinemc.scriptive.components.ClientComponent;
 import org.machinemc.scriptive.events.HoverEvent;
@@ -9,7 +10,7 @@ import org.machinemc.scriptive.style.ChatColor;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class JSONComponentSerializerTest {
+public class NBTPropertiesSerializerTest {
 
     @Test
     public void test() {
@@ -20,8 +21,11 @@ public class JSONComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        JSONComponentSerializer serializer = new JSONComponentSerializer();
-        assert serializer.deserialize(serializer.serialize(component)).equals(component);
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+        NBTPropertiesSerializer propertiesSerializer = NBTPropertiesSerializer.get();
+        NBTCompound serialized = componentSerializer.serialize(component, propertiesSerializer);
+
+        assert componentSerializer.deserialize(serialized, propertiesSerializer).equals(component);
     }
 
     @Test
@@ -33,14 +37,20 @@ public class JSONComponentSerializerTest {
             json = new String(is.readAllBytes());
         }
 
-        JSONComponentSerializer serializer = new JSONComponentSerializer();
-        TextComponent component = (TextComponent) serializer.deserialize(json);
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+
+        JSONPropertiesSerializer jsonSerializer = new JSONPropertiesSerializer();
+        TextComponent component = (TextComponent) componentSerializer.deserialize(json, jsonSerializer);
+
+        NBTPropertiesSerializer nbtSerializer = NBTPropertiesSerializer.get();
+        NBTCompound serialized = componentSerializer.serialize(component, nbtSerializer);
+        component = (TextComponent) componentSerializer.deserialize(serialized, nbtSerializer);
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();
         HoverEvent.Text content = hoverEvent.contents();
 
-        TextComponent first = (TextComponent) content.component();
-        TextComponent second = (TextComponent) content.component().getSiblings().getFirst();
+        TextComponent first = (TextComponent) content.component(componentSerializer);
+        TextComponent second = (TextComponent) first.getSiblings().getFirst();
 
         assert first.getText().equals("This is a hover event");
         assert first.isItalic().orElseThrow();

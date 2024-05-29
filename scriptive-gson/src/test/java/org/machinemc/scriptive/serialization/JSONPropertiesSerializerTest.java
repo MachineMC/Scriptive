@@ -9,7 +9,7 @@ import org.machinemc.scriptive.style.ChatColor;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class NBTComponentSerializerTest {
+public class JSONPropertiesSerializerTest {
 
     @Test
     public void test() {
@@ -20,9 +20,10 @@ public class NBTComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        NBTComponentSerializer serializer = new NBTComponentSerializer();
-
-        assert serializer.deserialize(serializer.serialize(component)).equals(component);
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+        JSONPropertiesSerializer propertiesSerializer = new JSONPropertiesSerializer();
+        String serialized = componentSerializer.serialize(component, propertiesSerializer);
+        assert componentSerializer.deserialize(serialized, propertiesSerializer).equals(component);
     }
 
     @Test
@@ -34,17 +35,15 @@ public class NBTComponentSerializerTest {
             json = new String(is.readAllBytes());
         }
 
-        JSONComponentSerializer serializer = new JSONComponentSerializer();
-        TextComponent component = (TextComponent) serializer.deserialize(json);
-
-        NBTComponentSerializer nbtSerializer = new NBTComponentSerializer();
-        component = (TextComponent) nbtSerializer.deserialize(nbtSerializer.serialize(component));
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+        JSONPropertiesSerializer propertiesSerializer = new JSONPropertiesSerializer();
+        TextComponent component = (TextComponent) componentSerializer.deserialize(json, propertiesSerializer);
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();
         HoverEvent.Text content = hoverEvent.contents();
 
-        TextComponent first = (TextComponent) content.component();
-        TextComponent second = (TextComponent) content.component().getSiblings().getFirst();
+        TextComponent first = (TextComponent) content.component(componentSerializer);
+        TextComponent second = (TextComponent) first.getSiblings().getFirst();
 
         assert first.getText().equals("This is a hover event");
         assert first.isItalic().orElseThrow();
