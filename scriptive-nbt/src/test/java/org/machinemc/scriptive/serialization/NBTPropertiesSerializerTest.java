@@ -49,7 +49,7 @@ public class NBTPropertiesSerializerTest {
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();
         HoverEvent.Text content = hoverEvent.contents();
 
-        TextComponent first = (TextComponent) content.component(componentSerializer);
+        TextComponent first = (TextComponent) content.component();
         TextComponent second = (TextComponent) first.getSiblings().getFirst();
 
         assert first.getText().equals("This is a hover event");

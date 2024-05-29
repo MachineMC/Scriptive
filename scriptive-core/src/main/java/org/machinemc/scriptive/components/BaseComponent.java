@@ -264,7 +264,7 @@ public abstract class BaseComponent implements Component {
                 .flatMap(ClickEvent::fromProperties)
                 .orElse(null));
         setHoverEvent(properties.getValue("hoverEvent", ComponentProperties.class)
-                .flatMap(HoverEvent::fromProperties)
+                .flatMap(hoverEvent -> HoverEvent.fromProperties(hoverEvent, serializer))
                 .orElse(null));
         clearSiblings();
         properties.getValue("extra", ComponentProperties[].class).ifPresent(extra -> {
