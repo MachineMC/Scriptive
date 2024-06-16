@@ -7,7 +7,6 @@ import org.machinemc.scriptive.events.ClickEvent;
 import org.machinemc.scriptive.events.HoverEvent;
 import org.machinemc.scriptive.formatify.exceptions.ParseException;
 import org.machinemc.scriptive.formatify.parameter.*;
-import org.machinemc.scriptive.serialization.ComponentProperties;
 import org.machinemc.scriptive.style.Colour;
 
 import java.util.Arrays;
@@ -15,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("unchecked")
 public interface DefaultTags {
     
     TagResolver COLOR = TagResolver.builder()
@@ -77,13 +77,11 @@ public interface DefaultTags {
         HoverEvent<?> hoverEvent;
         if (action == HoverEvent.SHOW_TEXT) {
             Component value = arguments.pollOr(arguments.formatify()::parse, "'value' is not specified");
-            //noinspection unchecked
             hoverEvent = new HoverEvent<>((HoverEvent.Action<HoverEvent.Text>) action, value);
         } else if (action == HoverEvent.SHOW_ITEM) {
             String id = arguments.pollOr("'id' is not specified");
             int amount = arguments.pollOrDefault(new IntegerParameter()::parse, 1);
             String tag = arguments.poll();
-            //noinspection unchecked
             hoverEvent = new HoverEvent<>(
                 (HoverEvent.Action<HoverEvent.Item>) action,
                 new HoverEvent.Item(id, amount, tag)
@@ -91,8 +89,7 @@ public interface DefaultTags {
         } else {
             UUID id = arguments.pollOr(UUID::fromString, "'id' is not specified");
             String type = arguments.poll();
-            ComponentProperties name = arguments.poll(arguments.formatify()::parse).getProperties();
-            //noinspection unchecked
+            Component name = arguments.poll(arguments.formatify()::parse);
             hoverEvent = new HoverEvent<>(
                 (HoverEvent.Action<HoverEvent.Entity>) action,
                 new HoverEvent.Entity(id, type, name)
