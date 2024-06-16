@@ -7,7 +7,7 @@ import org.machinemc.scriptive.style.ChatColor;
 
 import java.util.Map;
 
-public class MapComponentSerializerTest {
+public class MapPropertiesSerializerTest {
 
     @Test
     public void simpleTest() {
@@ -19,10 +19,11 @@ public class MapComponentSerializerTest {
         TextComponent sibling = TextComponent.of("I am a child component");
         component.append(sibling);
 
-        MapComponentSerializer serializer = new MapComponentSerializer();
-        Map<String, ?> map = serializer.serialize(component);
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+        MapPropertiesSerializer propertiesSerializer = MapPropertiesSerializer.get();
+        Map<String, ?> map = componentSerializer.serialize(component, propertiesSerializer);
 
-        Component deserialized = serializer.deserialize(map);
+        Component deserialized = componentSerializer.deserialize(map, propertiesSerializer);
 
         assert component.equals(deserialized);
     }

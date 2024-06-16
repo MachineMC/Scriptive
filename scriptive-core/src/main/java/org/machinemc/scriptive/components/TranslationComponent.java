@@ -320,8 +320,7 @@ public final class TranslationComponent extends BaseComponent implements ClientC
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
+    public void loadProperties(ComponentProperties properties, ComponentSerializer serializer) {
         super.loadProperties(properties, serializer);
         translation = properties.getValue("translate", String.class).orElseThrow();
         fallback = properties.getValue("translate", String.class).orElse(null);
@@ -329,10 +328,8 @@ public final class TranslationComponent extends BaseComponent implements ClientC
                 .map(ComponentProperty.Array::value)
                 .map(array -> {
                     Component[] components = new Component[array.length];
-                    for (int i = 0; i < array.length; i++) {
-                        Object next = serializer.serializeFromProperties(array[i]);
-                        components[i] = ((ComponentSerializer<Object>) serializer).deserialize(next);
-                    }
+                    for (int i = 0; i < array.length; i++)
+                        components[i] = serializer.deserialize(array[i]);
                     return components;
                 }).orElse(null);
     }

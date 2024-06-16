@@ -257,8 +257,7 @@ public abstract class BaseComponent implements Component {
 
     @Override
     @MustBeInvokedByOverriders
-    @SuppressWarnings("unchecked")
-    public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
+    public void loadProperties(ComponentProperties properties, ComponentSerializer serializer) {
         textFormat = new TextFormat(properties);
         setInsertion(properties.getValue("insertion", String.class).orElse(null));
         setClickEvent(properties.getValue("clickEvent", ComponentProperties.class)
@@ -270,9 +269,7 @@ public abstract class BaseComponent implements Component {
         clearSiblings();
         properties.getValue("extra", ComponentProperties[].class).ifPresent(extra -> {
             Component[] siblings = Arrays.stream(extra)
-                    .map(serializer::serializeFromProperties)
-                    .map(Object.class::cast)
-                    .map(o -> ((ComponentSerializer<Object>) serializer).deserialize(o))
+                    .map(serializer::deserialize)
                     .toArray(Component[]::new);
             for (Component sibling : siblings) append(sibling);
         });

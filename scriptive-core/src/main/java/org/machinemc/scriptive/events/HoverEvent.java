@@ -46,13 +46,12 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
      * Creates hover event from component properties.
      *
      * @param properties component properties
-     * @param serializer serializer to use for deserialization of text hover events
      * @return hover event
      * @param <V> hover event value type
      */
     @SuppressWarnings("unchecked")
     public static <V extends HoverEvent.Value> Optional<HoverEvent<V>> fromProperties(ComponentProperties properties,
-                                                                                      ComponentSerializer<?> serializer) {
+                                                                                      ComponentSerializer serializer) {
         if (!properties.contains("action")) return Optional.empty();
         String actionName = properties.getValue("action", String.class).orElse(null);
         if (actionName == null) return Optional.empty();
@@ -74,7 +73,7 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
         if (action == SHOW_ENTITY) {
             ComponentProperties contents = properties.getValue("contents", ComponentProperties.class).orElse(null);
             if (contents == null) return Optional.empty();
-            return Optional.of(new HoverEvent<>(action, (V) new Entity(contents)));
+            return Optional.of(new HoverEvent<>(action, (V) new Entity(contents, serializer)));
         }
 
         return Optional.empty();
@@ -228,9 +227,8 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
             Objects.requireNonNull(component, "Component can not be null");
         }
 
-        @SuppressWarnings("unchecked")
-        public Text(ComponentProperties properties, ComponentSerializer<?> serializer) {
-            this(((ComponentSerializer<Object>) serializer).deserialize(serializer.serializeFromProperties(properties)));
+        public Text(ComponentProperties componentProperties, ComponentSerializer serializer) {
+            this(serializer.deserialize(componentProperties));
         }
 
         @Override
@@ -280,17 +278,17 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
      *             if this value is not specified
      * @param name custom name of the entity
      */
-    public record Entity(UUID id, @Nullable String type, @Nullable ComponentProperties name) implements Value {
+    public record Entity(UUID id, @Nullable String type, @Nullable Component name) implements Value {
 
         public Entity {
             Objects.requireNonNull(id, "Entity UUID can not be null");
         }
 
-        public Entity(ComponentProperties properties) {
+        public Entity(ComponentProperties properties, ComponentSerializer serializer) {
             this(
                     UUID.fromString(properties.getValue("id", String.class).orElseThrow()),
                     properties.getValue("type", String.class).orElse(null),
-                    properties.getValue("name", ComponentProperties.class).orElse(null)
+                    properties.getValue("name", ComponentProperties.class).map(serializer::deserialize).orElse(null)
             );
         }
 
@@ -299,7 +297,8 @@ public record HoverEvent<V extends HoverEvent.Value>(Action<V> action, V content
             ComponentProperties properties = new ComponentProperties();
             properties.set("id", id.toString());
             properties.set("type", type);
-            properties.set("name", name);
+            if (name != null)
+                properties.set("name", name.getProperties());
             return properties.unmodifiableView();
         }
 

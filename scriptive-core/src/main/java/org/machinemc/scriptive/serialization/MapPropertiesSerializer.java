@@ -5,17 +5,21 @@ import java.util.*;
 /**
  * Serializer for Java {@link Map}.
  */
-public class MapComponentSerializer extends ComponentSerializer<Map<String, ?>> {
+public class MapPropertiesSerializer implements PropertiesSerializer<Map<String, ?>> {
+
+    private static final MapPropertiesSerializer INSTANCE = new MapPropertiesSerializer();
+
+    private MapPropertiesSerializer() {}
 
     @Override
     @SuppressWarnings("unchecked")
-    public Map<String, ?> serializeFromProperties(ComponentProperties properties) {
+    public Map<String, ?> serialize(ComponentProperties properties) {
         Objects.requireNonNull(properties, "Component properties can not be null");
         return (Map<String, ?>) unwrap(ComponentProperty.properties(properties));
     }
 
     @Override
-    public ComponentProperties deserializeAsProperties(Map<String, ?> value) {
+    public ComponentProperties deserialize(Map<String, ?> value) {
         Objects.requireNonNull(value, "Map can not be null");
         return ComponentProperty.convertToProperties(wrap(value)).value();
     }
@@ -56,6 +60,10 @@ public class MapComponentSerializer extends ComponentSerializer<Map<String, ?>> 
             }
             default -> ComponentProperty.of(o);
         };
+    }
+
+    public static MapPropertiesSerializer get() {
+        return INSTANCE;
     }
 
 }

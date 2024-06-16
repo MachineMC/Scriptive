@@ -9,7 +9,7 @@ import org.machinemc.scriptive.style.ChatColor;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class JSONComponentSerializerTest {
+public class JSONPropertiesSerializerTest {
 
     @Test
     public void test() {
@@ -20,8 +20,10 @@ public class JSONComponentSerializerTest {
                 .append(" this is a child component")
                 .finish();
 
-        JSONComponentSerializer serializer = new JSONComponentSerializer();
-        assert serializer.deserialize(serializer.serialize(component)).equals(component);
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+        JSONPropertiesSerializer propertiesSerializer = new JSONPropertiesSerializer();
+        String serialized = componentSerializer.serialize(component, propertiesSerializer);
+        assert componentSerializer.deserialize(serialized, propertiesSerializer).equals(component);
     }
 
     @Test
@@ -33,14 +35,15 @@ public class JSONComponentSerializerTest {
             json = new String(is.readAllBytes());
         }
 
-        JSONComponentSerializer serializer = new JSONComponentSerializer();
-        TextComponent component = (TextComponent) serializer.deserialize(json);
+        ComponentSerializer componentSerializer = new ComponentSerializer();
+        JSONPropertiesSerializer propertiesSerializer = new JSONPropertiesSerializer();
+        TextComponent component = (TextComponent) componentSerializer.deserialize(json, propertiesSerializer);
 
         HoverEvent<HoverEvent.Text> hoverEvent = (HoverEvent<HoverEvent.Text>) component.getHoverEvent().orElseThrow();
         HoverEvent.Text content = hoverEvent.contents();
 
         TextComponent first = (TextComponent) content.component();
-        TextComponent second = (TextComponent) content.component().getSiblings().getFirst();
+        TextComponent second = (TextComponent) first.getSiblings().getFirst();
 
         assert first.getText().equals("This is a hover event");
         assert first.isItalic().orElseThrow();

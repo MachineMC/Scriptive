@@ -8,27 +8,27 @@ import java.util.Objects;
 /**
  * Serializer for JSON string representation.
  */
-public class JSONComponentSerializer extends ComponentSerializer<String> {
+public class JSONPropertiesSerializer implements PropertiesSerializer<String> {
 
     private final Gson gson;
 
-    public JSONComponentSerializer() {
+    public JSONPropertiesSerializer() {
         this(new Gson());
     }
 
-    public JSONComponentSerializer(Gson gson) {
+    public JSONPropertiesSerializer(Gson gson) {
         this.gson = Objects.requireNonNull(gson, "GSON instance can not be null");
     }
 
     @Override
-    public String serializeFromProperties(ComponentProperties properties) {
+    public String serialize(ComponentProperties properties) {
         Objects.requireNonNull(properties, "Component properties can not be null");
         JsonElement element = unwrap(ComponentProperty.properties(properties));
         return gson.toJson(element);
     }
 
     @Override
-    public ComponentProperties deserializeAsProperties(String value) {
+    public ComponentProperties deserialize(String value) {
         Objects.requireNonNull(value, "JSON can not be null");
         JsonElement element = JsonParser.parseString(value);
         return ComponentProperty.convertToProperties(wrap(element)).value();

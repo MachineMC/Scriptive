@@ -120,7 +120,7 @@ public final class TextComponent extends BaseComponent implements ClientComponen
     }
 
     @Override
-    public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
+    public void loadProperties(ComponentProperties properties, ComponentSerializer serializer) {
         super.loadProperties(properties, serializer);
         text = properties.getValue("text", String.class).orElseThrow();
     }

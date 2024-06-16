@@ -272,7 +272,7 @@ public interface Component extends Contents, Cloneable, HoverEvent.ValueHolder<H
      * @param properties properties to load to this component
      * @param serializer serializer
      */
-    void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer);
+    void loadProperties(ComponentProperties properties, ComponentSerializer serializer);
 
     @Override
     default HoverEvent.Text asHoverEventValue() {

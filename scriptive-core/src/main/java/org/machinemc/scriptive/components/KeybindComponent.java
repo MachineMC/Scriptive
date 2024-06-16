@@ -98,7 +98,7 @@ public final class KeybindComponent extends BaseComponent implements ClientCompo
     }
 
     @Override
-    public void loadProperties(ComponentProperties properties, ComponentSerializer<?> serializer) {
+    public void loadProperties(ComponentProperties properties, ComponentSerializer serializer) {
         super.loadProperties(properties, serializer);
         keybind = properties.getValue("keybind", String.class).orElseThrow();
     }

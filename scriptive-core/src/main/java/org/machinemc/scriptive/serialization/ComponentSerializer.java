@@ -15,10 +15,8 @@ import java.util.function.Supplier;
 
 /**
  * A {@link Component} serializer and deserializer.
- *
- * @param <T> serialized type
  */
-public abstract class ComponentSerializer<T> {
+public class ComponentSerializer {
 
     private final Set<Class<? extends Component>> registered = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -26,22 +24,6 @@ public abstract class ComponentSerializer<T> {
     private final Map<String, Class<? extends Component>> uniqueKeys = new ConcurrentHashMap<>();
 
     private final Map<Class<? extends Component>, Function<ComponentProperties, ? extends Component>> componentCreators = new ConcurrentHashMap<>();
-
-    /**
-     * Serializes component properties.
-     *
-     * @param properties component properties
-     * @return value
-     */
-    public abstract T serializeFromProperties(ComponentProperties properties);
-
-    /**
-     * Deserializes to component properties.
-     *
-     * @param value value
-     * @return component properties
-     */
-    public abstract ComponentProperties deserializeAsProperties(T value);
 
     /**
      * Creates new component serializer and automatically registers the 3
@@ -82,10 +64,20 @@ public abstract class ComponentSerializer<T> {
      * @param component component
      * @return output
      */
-    public T serialize(Component component) {
+    public <T> T serialize(Component component, PropertiesSerializer<T> propertiesSerializer) {
+        return propertiesSerializer.serialize(serialize(component));
+    }
+
+    /**
+     * Serializes the given component.
+     *
+     * @param component component
+     * @return output
+     */
+    public ComponentProperties serialize(Component component) {
         if (!registered.contains(component.getType()))
             throw new UnsupportedOperationException("Serializer does not support components of type " + component.getType().getName());
-        return serializeFromProperties(component.getProperties());
+        return component.getProperties();
     }
 
     /**
@@ -94,8 +86,17 @@ public abstract class ComponentSerializer<T> {
      * @param value input
      * @return component
      */
-    public Component deserialize(T value) {
-        ComponentProperties properties = deserializeAsProperties(value);
+    public <T> Component deserialize(T value, PropertiesSerializer<T> propertiesSerializer) {
+        return deserialize(propertiesSerializer.deserialize(value));
+    }
+
+    /**
+     * Deserializes the given component.
+     *
+     * @param properties input
+     * @return component
+     */
+    public Component deserialize(ComponentProperties properties) {
         Class<? extends Component> type = getComponentTypeFromProperties(properties);
         if (type == null) throw new IllegalArgumentException("Unknown serialized component type");
         return newComponent(type, properties);
