@@ -1,19 +1,9 @@
 package org.machinemc.scriptive.formatify.lexer.token;
 
-public record Token(TokenType type, String value, int start, int end) {
+public record Token(TokenType type, String data, String raw) {
 
-    public boolean is(TokenType type, TokenType... types) {
-        if (this.type == type)
-            return true;
-        for (TokenType otherType : types) {
-            if (this.type == otherType)
-                return true;
-        }
-        return false;
-    }
-
-    public String substring(String string) {
-        return string.substring(start, end);
+    public Token(TokenType type, String data) {
+        this(type, data, data);
     }
 
 }

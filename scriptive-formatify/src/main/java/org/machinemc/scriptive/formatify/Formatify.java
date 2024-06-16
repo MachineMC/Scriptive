@@ -1,70 +1,104 @@
 package org.machinemc.scriptive.formatify;
 
 import org.machinemc.scriptive.components.TextComponent;
-import org.machinemc.scriptive.formatify.lexer.LexicalAnalyzer;
-import org.machinemc.scriptive.formatify.tags.Tag;
-import org.machinemc.scriptive.formatify.tags.TagRegistry;
-import org.machinemc.scriptive.formatify.tree.RootNode;
+import org.machinemc.scriptive.formatify.exceptions.ParseException;
+import org.machinemc.scriptive.formatify.parser.FormatifyParser;
+import org.machinemc.scriptive.formatify.tag.TagResolver;
+import org.machinemc.scriptive.util.ChatUtils;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 public class Formatify {
 
-    private static final TagRegistry DEFAULT_REGISTRY = new TagRegistry();
-    private static final Consumer<String> DEFAULT_ERROR_HANDLER = error -> {};
-    private static final Formatify DEFAULT_FORMATIFY = new Formatify(DEFAULT_REGISTRY, DEFAULT_ERROR_HANDLER);
+    private final TagResolver tagResolver;
+    private final Consumer<ParseException> errorHandler;
+    private final boolean strict;
 
-    private final TagRegistry registry;
-    private final Consumer<String> errorHandler;
-
-    private Formatify(TagRegistry registry, Consumer<String> errorHandler) {
-        this.registry = registry;
+    private Formatify(TagResolver tagResolver, Consumer<ParseException> errorHandler, boolean strict) {
+        this.tagResolver = tagResolver;
         this.errorHandler = errorHandler;
+        this.strict = strict;
     }
 
     public TextComponent parse(String string) {
-        return parse(string, registry);
+        return new FormatifyParser(this, string).parse();
     }
 
-    public TextComponent parse(String string, TagRegistry registry) {
-        LexicalAnalyzer lexer = new LexicalAnalyzer(string);
-        RootNode tree = FormatifyParser.buildTree(string, lexer.lex(), registry, errorHandler);
-        return FormatifyParser.componentFromTree(tree);
+    public TagResolver tagResolver() {
+        return tagResolver;
+    }
+
+    public Consumer<ParseException> errorHandler() {
+        return errorHandler;
+    }
+
+    public boolean isStrict() {
+        return strict;
+    }
+
+    public boolean isLenient() {
+        return !strict;
+    }
+
+    public Formatify withTagResolver(TagResolver tagResolver) {
+        return new Formatify(tagResolver, errorHandler, strict);
+    }
+
+    public Formatify withErrorHandler(Consumer<ParseException> errorHandler) {
+        return new Formatify(tagResolver, errorHandler, strict);
+    }
+
+    public Formatify lenient() {
+        return new Formatify(tagResolver, errorHandler, false);
+    }
+
+    public Formatify strict() {
+        return new Formatify(tagResolver, errorHandler, true);
     }
 
     public static Formatify formatify() {
-        return DEFAULT_FORMATIFY;
+        return Formatify.builder()
+            .tagResolver(TagResolver.defaults())
+            .errorHandler(error -> System.err.println(error.getMessage()))
+            .build();
     }
 
     public static Builder builder() {
-        return builder(true);
-    }
-
-    public static Builder builder(boolean defaultRegistry) {
-        return new Builder(defaultRegistry ? DEFAULT_REGISTRY : new TagRegistry());
+        return new Builder();
     }
 
     public static class Builder {
 
-        private final TagRegistry registry;
-        private Consumer<String> errorHandler;
+        private TagResolver tagResolver = TagResolver.defaults();
+        private Consumer<ParseException> errorHandler = error -> {};
+        private boolean strict = false;
 
-        public Builder(TagRegistry registry) {
-            this.registry = registry;
+        public Builder resolvers(Collection<TagResolver> resolvers) {
+            return tagResolver(TagResolver.resolvers(resolvers));
         }
 
-        public Builder tag(Tag tag) {
-            registry.registerTag(tag);
+        public Builder resolvers(TagResolver... resolvers) {
+            return tagResolver(TagResolver.resolvers(resolvers));
+        }
+
+        public Builder tagResolver(TagResolver tagResolver) {
+            this.tagResolver = tagResolver;
             return this;
         }
 
-        public Builder onError(Consumer<String> errorHandler) {
+        public Builder errorHandler(Consumer<ParseException> errorHandler) {
             this.errorHandler = errorHandler;
             return this;
         }
 
+        public Builder strict() {
+            this.strict = true;
+            return this;
+        }
+
         public Formatify build() {
-            return new Formatify(registry, errorHandler);
+            return new Formatify(tagResolver, errorHandler, strict);
         }
 
     }

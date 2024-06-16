@@ -1,73 +1,81 @@
 package org.machinemc.scriptive.formatify.lexer;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.machinemc.scriptive.formatify.lexer.token.Token;
 import org.machinemc.scriptive.formatify.lexer.token.TokenType;
-import org.machinemc.scriptive.util.StringReader;
 
 import java.util.LinkedList;
-
-import static org.machinemc.scriptive.formatify.FormatifyParser.*;
+import java.util.List;
 
 public class LexicalAnalyzer {
 
-    private final StringReader reader;
+    private final String string;
+    private int cursor = 0;
 
-    public LexicalAnalyzer(@NotNull String data) {
-        this.reader = new StringReader(data) ;
+    public LexicalAnalyzer(String string) {
+        this.string = string;
     }
 
-    public LinkedList<Token> lex() {
-        LinkedList<Token> tokenList = new LinkedList<>();
-        Token token;
-        while (reader.canRead()) {
+    public LinkedList<Token> tokenize() {
+        LinkedList<Token> tokens = new LinkedList<>();
+        Token token = nextToken();
+        while (token != null) {
+            tokens.add(token);
             token = nextToken();
-            tokenList.add(token);
         }
-        return tokenList;
+        return tokens;
     }
 
-    private Token nextToken() {
-        int start = reader.getCursor();
-        char c = reader.peek();
-        if (c == TAG_START) {
-            Token token = handleTag();
-            if (token != null)
-                return token;
-            reader.setCursor(start + 1);
+    private @Nullable Token nextToken() {
+        if (!canRead()) return null;
+        int start = cursor;
+        if (peek() == '<') {
+            Token token = parseTag();
+            if (token != null) return token;
+            cursor = start + 1;
         }
-        reader.readUntil(TAG_START);
-        return new Token(
-                TokenType.TEXT,
-                reader.getInput().substring(start, reader.getCursor()),
-                start, reader.getCursor()
-        );
+        while (canRead() && peek() != '<')
+            cursor++;
+        return new Token(TokenType.TEXT_LITERAL, string.substring(start, cursor));
     }
 
-    private @Nullable Token handleTag() {
-        if (!reader.canRead(2))
-            return null;
-
+    private Token parseTag() {
+        if (!canRead(2)) return null;
+        int start = cursor;
         int level = 0;
-        int startIndex = reader.getCursor();
-        TokenType type = reader.peek(1) == TAG_CLOSE ? TokenType.TAG_CLOSE : TokenType.TAG_OPEN;
-        do {
-            char c;
-            if ((c = reader.read()) == TAG_START) {
-                level++;
-            } else if (c == TAG_END) {
-                level--;
+        TokenType type = peek(1) == '/' ? TokenType.TAG_CLOSE : TokenType.TAG_OPEN;
+        while (canRead()) {
+            char c = read();
+            if (c == '<') level++;
+            else if (c == '>' && --level == 0) {
+                return new Token(
+                    type,
+                    string.substring(start + (type == TokenType.TAG_CLOSE ? 2 : 1), cursor - 1),
+                    string.substring(start, cursor)
+                );
             }
-        } while (level != 0 && reader.canRead());
-        if (level != 0)
-            return null;
-        return new Token(
-                type,
-                reader.getInput().substring(startIndex + (type == TokenType.TAG_CLOSE ? 2 : 1), reader.getCursor() - 1),
-                startIndex,
-                reader.getCursor()
-        );
+        }
+        return null;
+    }
+
+    private char peek() {
+        return peek(0);
+    }
+
+    private char peek(int offset) {
+        return string.charAt(cursor + offset);
+    }
+
+    private char read() {
+        return string.charAt(cursor++);
+    }
+
+    private boolean canRead() {
+        return canRead(1);
+    }
+
+    private boolean canRead(int length) {
+        return cursor + length - 1 < string.length();
     }
 
 }

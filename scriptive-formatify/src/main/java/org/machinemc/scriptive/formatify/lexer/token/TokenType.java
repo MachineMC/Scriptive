@@ -2,8 +2,8 @@ package org.machinemc.scriptive.formatify.lexer.token;
 
 public enum TokenType {
 
-    TEXT,
     TAG_OPEN,
-    TAG_CLOSE
+    TAG_CLOSE,
+    TEXT_LITERAL,
 
 }
