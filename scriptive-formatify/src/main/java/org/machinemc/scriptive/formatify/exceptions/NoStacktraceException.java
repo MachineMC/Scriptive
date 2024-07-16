@@ -4,7 +4,6 @@ public class NoStacktraceException extends RuntimeException {
 
     public NoStacktraceException() {
         this(null, null);
-        System.out.println("A");
     }
 
     public NoStacktraceException(String message) {
