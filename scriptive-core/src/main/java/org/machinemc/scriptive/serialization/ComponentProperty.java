@@ -37,7 +37,18 @@ public sealed interface ComponentProperty<Value> {
      * @param value properties array value
      * @return properties array property
      */
-    static Array array(ComponentProperties[] value) { return new Array(value); }
+    static Array array(ComponentProperty<?>[] value) { return new Array(value); }
+
+    /**
+     * @param value properties array value
+     * @return properties array property
+     */
+    static Array array(ComponentProperties[] value) { 
+        ComponentProperty<?>[] array = new ComponentProperty[value.length];
+        for (int i = 0; i < array.length; i++)
+            array[i] = new Properties(value[i]);
+        return ComponentProperty.array(array);
+    }
 
     /**
      * Components are represented as {@link Properties} property type by default, but
@@ -61,10 +72,15 @@ public sealed interface ComponentProperty<Value> {
                 yield new Properties(properties);
             }
 
-            case Array array -> {
+            case Array(var array) -> {
+                if (array.length == 0) yield convertToProperties(string("")); // empty component
+
                 ComponentProperties properties = new ComponentProperties();
-                ComponentProperties[] propertiesArray = array.value;
-                if (propertiesArray.length == 0) yield convertToProperties(string("")); // empty component
+                ComponentProperties[] propertiesArray = new ComponentProperties[array.length];
+                for (int i = 0; i < propertiesArray.length; i++) {
+                    propertiesArray[i] = convertToProperties(array[i]).value();
+                }
+
                 properties.copyAll(propertiesArray[0]);
                 ComponentProperties[] extra = new ComponentProperties[propertiesArray.length - 1];
                 System.arraycopy(propertiesArray, 1, extra, 0, extra.length);
@@ -91,7 +107,8 @@ public sealed interface ComponentProperty<Value> {
             case java.lang.Boolean b -> new Boolean(b);
             case java.lang.Integer i -> new Integer(i);
             case ComponentProperties properties -> new Properties(properties);
-            case ComponentProperties[] properties -> new Array(properties);
+            case @SuppressWarnings("rawtypes") ComponentProperty[] properties -> new Array(properties);
+            case ComponentProperties[] properties -> array(properties);
             default -> throw new UnsupportedOperationException("Unsupported value: " + object);
         };
     }
@@ -103,6 +120,9 @@ public sealed interface ComponentProperty<Value> {
      */
     Value value();
 
+    /**
+     * @return copy of this property
+     */
     ComponentProperty<Value> clone();
 
     /**
@@ -172,7 +192,7 @@ public sealed interface ComponentProperty<Value> {
     /**
      * Component properties array component property.
      */
-    record Array(ComponentProperties[] value) implements ComponentProperty<ComponentProperties[]> {
+    record Array(ComponentProperty<?>[] value) implements ComponentProperty<ComponentProperty<?>[]> {
 
         public Array {
             Objects.requireNonNull(value, "Value can not be null");
@@ -180,7 +200,7 @@ public sealed interface ComponentProperty<Value> {
 
         @Override
         public Array clone() {
-            ComponentProperties[] next = new ComponentProperties[value.length];
+            ComponentProperty<?>[] next = new ComponentProperty<?>[value.length];
             for (int i = 0; i < value.length; i++) next[i] = value[i].clone();
             return new Array(next);
         }

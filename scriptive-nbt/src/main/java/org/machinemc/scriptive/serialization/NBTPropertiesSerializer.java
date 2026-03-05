@@ -40,7 +40,6 @@ public class NBTPropertiesSerializer implements PropertiesSerializer<NBTCompound
             case ComponentProperty.Array array -> {
                 NBTList nbtList = new NBTList();
                 Arrays.stream(array.value())
-                        .map(ComponentProperty::properties)
                         .map(this::unwrap)
                         .forEach(nbtList::add);
                 yield nbtList;
@@ -70,6 +69,9 @@ public class NBTPropertiesSerializer implements PropertiesSerializer<NBTCompound
         };
     }
 
+    /**
+     * @return NBT properties serializer instance
+     */
     public static NBTPropertiesSerializer get() {
         return INSTANCE;
     }

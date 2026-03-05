@@ -5,7 +5,7 @@ package org.machinemc.scriptive.components;
  */
 public sealed interface ClientComponent
         extends Component
-        permits KeybindComponent, TextComponent, TranslationComponent {
+        permits KeybindComponent, ObjectComponent, TextComponent, TranslationComponent {
 
     ClientComponent clone();
 

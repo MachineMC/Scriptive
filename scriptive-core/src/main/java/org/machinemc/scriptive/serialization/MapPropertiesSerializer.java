@@ -34,7 +34,6 @@ public class MapPropertiesSerializer implements PropertiesSerializer<Map<String,
             case ComponentProperty.Array array -> {
                 List<Object> list = new ArrayList<>();
                 Arrays.stream(array.value())
-                        .map(ComponentProperty::properties)
                         .map(this::unwrap)
                         .forEach(list::add);
                 yield list;

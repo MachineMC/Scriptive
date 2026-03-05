@@ -1,11 +1,14 @@
 package org.machinemc.scriptive.serialization;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.machinemc.scriptive.components.Component;
 import org.machinemc.scriptive.components.TextComponent;
 import org.machinemc.scriptive.style.ChatColor;
 
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MapPropertiesSerializerTest {
 
@@ -25,7 +28,9 @@ public class MapPropertiesSerializerTest {
 
         Component deserialized = componentSerializer.deserialize(map, propertiesSerializer);
 
-        assert component.equals(deserialized);
+        System.out.println(component.getProperties());
+        System.out.println(deserialized.getProperties());
+        assertEquals(deserialized, component);
     }
 
 }

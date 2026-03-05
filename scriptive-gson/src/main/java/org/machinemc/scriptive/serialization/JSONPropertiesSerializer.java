@@ -12,10 +12,18 @@ public class JSONPropertiesSerializer implements PropertiesSerializer<String> {
 
     private final Gson gson;
 
+    /**
+     * Creates new JSON properties serializer.
+     */
     public JSONPropertiesSerializer() {
         this(new Gson());
     }
 
+    /**
+     * Creates new JSON properties serializer.
+     *
+     * @param gson GSON instance to use
+     */
     public JSONPropertiesSerializer(Gson gson) {
         this.gson = Objects.requireNonNull(gson, "GSON instance can not be null");
     }
@@ -47,7 +55,6 @@ public class JSONPropertiesSerializer implements PropertiesSerializer<String> {
             case ComponentProperty.Array array -> {
                 JsonArray json = new JsonArray();
                 Arrays.stream(array.value())
-                        .map(ComponentProperty::properties)
                         .map(this::unwrap)
                         .forEach(json::add);
                 yield json;

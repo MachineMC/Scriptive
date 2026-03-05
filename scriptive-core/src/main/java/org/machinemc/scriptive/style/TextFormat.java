@@ -26,7 +26,6 @@ public final class TextFormat implements Contents {
     public TextFormat(ComponentProperties properties) {
         color = properties.getValue("color", String.class).map(Colour::fromName).orElse(null);
         font = properties.getValue("font", String.class).orElse(null);
-        styleMap.clear();
         Arrays.stream(ChatStyle.values()).forEach(style -> {
             Boolean value = properties.getValue(style.getName(), Boolean.class).orElse(null);
             if (value == null) return;

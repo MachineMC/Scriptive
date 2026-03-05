@@ -4,6 +4,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.machinemc.scriptive.serialization.ComponentProperties;
+import org.machinemc.scriptive.serialization.ComponentProperty;
 import org.machinemc.scriptive.serialization.ComponentSerializer;
 import org.machinemc.scriptive.serialization.Contents;
 import org.machinemc.scriptive.events.ClickEvent;
@@ -267,8 +268,10 @@ public abstract class BaseComponent implements Component {
                 .flatMap(hoverEvent -> HoverEvent.fromProperties(hoverEvent, serializer))
                 .orElse(null));
         clearSiblings();
-        properties.getValue("extra", ComponentProperties[].class).ifPresent(extra -> {
+        properties.getValue("extra", ComponentProperty[].class).ifPresent(extra -> {
             Component[] siblings = Arrays.stream(extra)
+                    .map(ComponentProperty::convertToProperties)
+                    .map(ComponentProperty.Properties::value)
                     .map(serializer::deserialize)
                     .toArray(Component[]::new);
             for (Component sibling : siblings) append(sibling);

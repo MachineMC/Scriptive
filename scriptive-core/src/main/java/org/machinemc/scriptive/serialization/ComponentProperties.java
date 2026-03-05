@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.machinemc.scriptive.components.Component;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -30,6 +31,17 @@ public sealed class ComponentProperties {
 
     /**
      * Returns component property of this map or empty in case
+     * there is no property with such a name.
+     *
+     * @param key key of the property
+     * @return property
+     */
+    public Optional<ComponentProperty<?>> get(String key) {
+        return Optional.ofNullable(propertyMap.get(key));
+    }
+
+    /**
+     * Returns component property of this map or empty in case
      * there is no property with such a name or the property
      * has different type.
      *
@@ -42,6 +54,19 @@ public sealed class ComponentProperties {
         ComponentProperty<?> property = propertyMap.get(key);
         if (!type.isInstance(property)) return Optional.empty();
         return Optional.of(type.cast(property));
+    }
+
+    /**
+     * Returns component property value of this map or empty in case
+     * there is no property with such a name.
+     *
+     * @param key key of the property
+     * @return property value
+     */
+    public Optional<Object> getValue(String key) {
+        ComponentProperty<?> property = propertyMap.get(key);
+        if (property == null) return Optional.empty();
+        return Optional.of(property.value());
     }
 
     /**
@@ -131,6 +156,12 @@ public sealed class ComponentProperties {
         propertyMap.put(key, value);
     }
 
+    /**
+     * Sets a property value.
+     *
+     * @param key key
+     * @param value new value
+     */
     public void set(String key, String value) {
         if (value == null) {
             set(key, (ComponentProperty<?>) null);
@@ -139,6 +170,12 @@ public sealed class ComponentProperties {
         set(key, new ComponentProperty.String(value));
     }
 
+    /**
+     * Sets a property value.
+     *
+     * @param key key
+     * @param value new value
+     */
     public void set(String key, Boolean value) {
         if (value == null) {
             set(key, (ComponentProperty<?>) null);
@@ -147,6 +184,12 @@ public sealed class ComponentProperties {
         set(key, new ComponentProperty.Boolean(value));
     }
 
+    /**
+     * Sets a property value.
+     *
+     * @param key key
+     * @param value new value
+     */
     public void set(String key, Integer value) {
         if (value == null) {
             set(key, (ComponentProperty<?>) null);
@@ -155,6 +198,12 @@ public sealed class ComponentProperties {
         set(key, new ComponentProperty.Integer(value));
     }
 
+    /**
+     * Sets a property value.
+     *
+     * @param key key
+     * @param value new value
+     */
     public void set(String key, ComponentProperties value) {
         if (value == null) {
             set(key, (ComponentProperty<?>) null);
@@ -163,7 +212,13 @@ public sealed class ComponentProperties {
         set(key, new ComponentProperty.Properties(value));
     }
 
-    public void set(String key, ComponentProperties[] value) {
+    /**
+     * Sets a property value.
+     *
+     * @param key key
+     * @param value new value
+     */
+    public void set(String key, ComponentProperty<?>[] value) {
         if (value == null) {
             set(key, (ComponentProperty<?>) null);
             return;
@@ -171,26 +226,77 @@ public sealed class ComponentProperties {
         set(key, new ComponentProperty.Array(value));
     }
 
+    /**
+     * Sets a property value.
+     *
+     * @param key key
+     * @param value new value
+     */
+    public void set(String key, ComponentProperties[] value) {
+        if (value == null) {
+            set(key, (ComponentProperty<?>) null);
+            return;
+        }
+        ComponentProperty<?>[] properties = new ComponentProperty[value.length];
+        for (int i = 0; i < properties.length; i++)
+            properties[i] = new ComponentProperty.Properties(value[i]);
+        set(key, new ComponentProperty.Array(properties));
+    }
+
+    /**
+     * @param key key
+     * @return whether the property map contains given key
+     */
     public boolean contains(String key) {
         return propertyMap.containsKey(key);
     }
 
+    /**
+     * Copies all properties from another map.
+     *
+     * @param properties properties to copy
+     */
     public void copyAll(ComponentProperties properties) {
         propertyMap.putAll(properties.clone().propertyMap);
     }
 
+    /**
+     * Clears all properties from this map.
+     *
+     * @param properties properties (ignored)
+     * @deprecated use {@link #clear()}
+     */
+    @Deprecated(forRemoval = true)
     public void clear(ComponentProperties properties) {
         propertyMap.clear();
     }
 
+    /**
+     * Clears all properties from this map.
+     */
+    public void clear() {
+        propertyMap.clear();
+    }
+
+    /**
+     * @return set of all keys in this map
+     */
     public @Unmodifiable Set<String> getKeys() {
         return Collections.unmodifiableSet(propertyMap.keySet());
     }
 
+    /**
+     * Performs an action for each property in this map.
+     *
+     * @param consumer action
+     */
     public void forEach(BiConsumer<String, ComponentProperty<?>> consumer) {
         propertyMap.forEach(consumer);
     }
 
+    /**
+     * @return unmodifiable view of this properties map
+     */
     public @UnmodifiableView ComponentProperties unmodifiableView() {
         return this.new View();
     }
@@ -212,6 +318,19 @@ public sealed class ComponentProperties {
     @Override
     public int hashCode() {
         return propertyMap.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("ComponentProperties[");
+        boolean first = true;
+        for (Map.Entry<String, ComponentProperty<?>> entry : propertyMap.entrySet()) {
+            if (!first)
+                builder.append(", ");
+            builder.append(entry.getKey()).append('=').append(entry.getValue());
+            first = false;
+        }
+        return builder.append(']').toString();
     }
 
     final class View extends ComponentProperties {
@@ -279,6 +398,11 @@ public sealed class ComponentProperties {
         @Override
         public int hashCode() {
             return ComponentProperties.this.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return ComponentProperties.this.toString();
         }
 
     }

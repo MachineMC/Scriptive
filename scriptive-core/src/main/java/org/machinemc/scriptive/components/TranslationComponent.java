@@ -325,11 +325,11 @@ public final class TranslationComponent extends BaseComponent implements ClientC
         translation = properties.getValue("translate", String.class).orElseThrow();
         fallback = properties.getValue("translate", String.class).orElse(null);
         arguments = properties.get("with", ComponentProperty.Array.class)
-                .map(ComponentProperty.Array::value)
                 .map(array -> {
-                    Component[] components = new Component[array.length];
-                    for (int i = 0; i < array.length; i++)
-                        components[i] = serializer.deserialize(array[i]);
+                    int length = array.value().length;
+                    Component[] components = new Component[length];
+                    for (int i = 0; i < length; i++)
+                        components[i] = serializer.deserialize(ComponentProperty.convertToProperties(array).value());
                     return components;
                 }).orElse(null);
     }
