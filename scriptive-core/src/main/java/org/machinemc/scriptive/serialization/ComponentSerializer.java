@@ -1,10 +1,7 @@
 package org.machinemc.scriptive.serialization;
 
 import org.jetbrains.annotations.Nullable;
-import org.machinemc.scriptive.components.Component;
-import org.machinemc.scriptive.components.KeybindComponent;
-import org.machinemc.scriptive.components.TextComponent;
-import org.machinemc.scriptive.components.TranslationComponent;
+import org.machinemc.scriptive.components.*;
 
 import java.util.Collections;
 import java.util.Map;
@@ -33,6 +30,8 @@ public class ComponentSerializer {
         register(KeybindComponent.class, () -> KeybindComponent.of(""));
         register(TextComponent.class, TextComponent::empty);
         register(TranslationComponent.class, () -> TranslationComponent.of(""));
+        register(ObjectComponent.Atlas.class, () -> ObjectComponent.atlas(""));
+        register(ObjectComponent.Player.class, () -> ObjectComponent.player("", false));
     }
 
     /**

@@ -49,6 +49,17 @@ public abstract sealed class ObjectComponent extends BaseComponent implements Cl
     /**
      * Creates new player object component.
      *
+     * @param player player name
+     * @param hat whether the hat should be displayed
+     * @return player component
+     */
+    public static Player player(String player, boolean hat) {
+        return new Player(ComponentProperty.string(player), hat);
+    }
+
+    /**
+     * Creates new player object component.
+     *
      * @param player player profile property
      * @param hat whether the hat should be displayed
      * @return player component
