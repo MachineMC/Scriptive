@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     `kotlin-dsl`
 }
@@ -8,8 +10,8 @@ repositories {
 
 tasks {
     compileKotlin {
-        kotlinOptions {
-            jvmTarget = "21"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 }
