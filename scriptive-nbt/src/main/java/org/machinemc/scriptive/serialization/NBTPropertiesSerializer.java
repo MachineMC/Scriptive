@@ -49,14 +49,9 @@ public class NBTPropertiesSerializer implements PropertiesSerializer<NBTCompound
 
     private ComponentProperty<?> wrap(NBT<?> nbt) {
         return switch (nbt) {
-            case NBTList nbtList -> {
-                ComponentProperties[] array = nbtList.listView().stream()
-                        .map(this::wrap)
-                        .map(ComponentProperty::convertToProperties)
-                        .map(ComponentProperty::value)
-                        .toArray(ComponentProperties[]::new);
-                yield ComponentProperty.array(array);
-            }
+            case NBTList nbtList -> ComponentProperty.array(nbtList.listView().stream()
+                    .map(this::wrap)
+                    .toArray(ComponentProperty[]::new));
             case NBTCompound compound -> {
                 ComponentProperties properties = new ComponentProperties();
                 compound.mapView().forEach((k, e) -> properties.set(k, wrap(e)));

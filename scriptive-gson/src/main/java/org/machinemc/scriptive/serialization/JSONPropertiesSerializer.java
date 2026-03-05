@@ -64,14 +64,9 @@ public class JSONPropertiesSerializer implements PropertiesSerializer<String> {
 
     private ComponentProperty<?> wrap(JsonElement element) {
         return switch (element) {
-            case JsonArray json -> {
-                ComponentProperties[] array = json.getAsJsonArray().asList().stream()
-                        .map(this::wrap)
-                        .map(ComponentProperty::convertToProperties)
-                        .map(ComponentProperty::value)
-                        .toArray(ComponentProperties[]::new);
-                yield ComponentProperty.array(array);
-            }
+            case JsonArray json -> ComponentProperty.array(json.getAsJsonArray().asList().stream()
+                    .map(this::wrap)
+                    .toArray(ComponentProperty[]::new));
             case JsonObject json -> {
                 ComponentProperties properties = new ComponentProperties();
                 json.asMap().forEach((k, e) -> properties.set(k, wrap(e)));

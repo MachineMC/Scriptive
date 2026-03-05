@@ -49,14 +49,9 @@ public class MapPropertiesSerializer implements PropertiesSerializer<Map<String,
                 map.forEach((k, e) -> properties.set((String) k, wrap(e)));
                 yield ComponentProperty.properties(properties);
             }
-            case List<?> list -> {
-                ComponentProperties[] array = list.stream()
-                        .map(this::wrap)
-                        .map(ComponentProperty::convertToProperties)
-                        .map(ComponentProperty::value)
-                        .toArray(ComponentProperties[]::new);
-                yield ComponentProperty.array(array);
-            }
+            case List<?> list -> ComponentProperty.array(list.stream()
+                    .map(this::wrap)
+                    .toArray(ComponentProperty[]::new));
             default -> ComponentProperty.of(o);
         };
     }
