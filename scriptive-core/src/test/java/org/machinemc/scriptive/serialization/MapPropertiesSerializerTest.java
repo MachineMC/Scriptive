@@ -28,8 +28,6 @@ public class MapPropertiesSerializerTest {
 
         Component deserialized = componentSerializer.deserialize(map, propertiesSerializer);
 
-        System.out.println(component.getProperties());
-        System.out.println(deserialized.getProperties());
         assertEquals(deserialized, component);
     }
 
