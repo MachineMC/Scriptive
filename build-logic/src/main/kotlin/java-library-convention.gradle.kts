@@ -28,6 +28,7 @@ dependencies {
     testImplementation(libs.findLibrary("junit-api").get())
     testRuntimeOnly(libs.findLibrary("junit-engine").get())
     testImplementation(libs.findLibrary("junit-params").get())
+    testRuntimeOnly(libs.findLibrary("junit-platform-launcher").get())
 }
 
 //

@@ -21,6 +21,9 @@ dependencyResolutionManagement {
             library("junit-engine", "org.junit.jupiter:junit-jupiter-engine:$junit")
             library("junit-params", "org.junit.jupiter:junit-jupiter-params:$junit")
 
+            val junitPlatform: String by settings
+            library("junit-platform-launcher", "org.junit.platform:junit-platform-launcher:$junitPlatform")
+
             val googleGson: String by settings
             library("google-gson", "com.google.code.gson:gson:$googleGson")
 
